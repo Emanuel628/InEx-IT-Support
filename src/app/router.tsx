@@ -1,0 +1,56 @@
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { AppShell } from '@/components/layout/AppShell';
+import {
+  ActivityPage,
+  AssetDetailPage,
+  AssetsPage,
+  BackupsPage,
+  CategoriesStatusesPage,
+  CreateTicketPage,
+  DashboardPage,
+  DataPage,
+  KnowledgeArticleDetailPage,
+  KnowledgeBasePage,
+  LoginPage,
+  NotFoundPage,
+  ReportsPage,
+  SettingsPage,
+  TeamPage,
+  TicketDetailPage,
+  TicketsPage,
+  UserDetailPage,
+  UsersPage,
+} from '@/pages/Placeholders';
+
+export const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/',
+    element: <AppShell />,
+    errorElement: <NotFoundPage />,
+    children: [
+      { index: true, element: <Navigate to="/dashboard" replace /> },
+      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'tickets', element: <TicketsPage /> },
+      { path: 'tickets/new', element: <CreateTicketPage /> },
+      { path: 'tickets/:ticketId', element: <TicketDetailPage /> },
+      { path: 'users', element: <UsersPage /> },
+      { path: 'users/:userId', element: <UserDetailPage /> },
+      { path: 'assets', element: <AssetsPage /> },
+      { path: 'assets/:assetId', element: <AssetDetailPage /> },
+      { path: 'knowledge', element: <KnowledgeBasePage /> },
+      { path: 'knowledge/:articleId', element: <KnowledgeArticleDetailPage /> },
+      { path: 'reports', element: <ReportsPage /> },
+      { path: 'settings', element: <SettingsPage /> },
+      { path: 'settings/team', element: <TeamPage /> },
+      { path: 'settings/categories', element: <CategoriesStatusesPage /> },
+      { path: 'activity', element: <ActivityPage /> },
+      { path: 'data', element: <DataPage /> },
+      { path: 'backups', element: <BackupsPage /> },
+      { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+]);
