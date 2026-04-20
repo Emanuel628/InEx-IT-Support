@@ -12,19 +12,21 @@ export function TicketDetailSummary({ ticket }: { ticket: TicketRecord }) {
       <section className="ticket-detail-card">
         <span className="ticket-detail-label">Requester</span>
         <strong>{ticket.requester}</strong>
-        <p>{ticket.department}</p>
+        <p>{ticket.requesterEmail || ticket.department}</p>
       </section>
 
       <section className="ticket-detail-card">
         <span className="ticket-detail-label">Assignment</span>
-        <strong>{ticket.assignedTech}</strong>
+        <strong>{ticket.assignedTech || 'Unassigned'}</strong>
         <p>{ticket.status.replace('_', ' ')}</p>
       </section>
 
       <section className="ticket-detail-card">
-        <span className="ticket-detail-label">Asset</span>
-        <strong>{ticket.asset}</strong>
-        <p>{ticket.category}</p>
+        <span className="ticket-detail-label">Context</span>
+        <strong>{ticket.appArea}</strong>
+        <p>
+          {ticket.category} · {ticket.environment}
+        </p>
       </section>
     </div>
   );
