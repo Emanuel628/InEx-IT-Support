@@ -3,25 +3,97 @@ export type TicketStatus = 'new' | 'in_progress' | 'waiting_on_user' | 'escalate
 export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
 
 export type TicketCategory =
-  | 'hardware'
-  | 'software'
-  | 'network'
-  | 'access'
-  | 'printer'
-  | 'email'
-  | 'security';
+  | 'bug'
+  | 'billing'
+  | 'exports'
+  | 'receipts'
+  | 'authentication'
+  | 'data_integrity'
+  | 'ui_ux'
+  | 'feature_request'
+  | 'infrastructure';
+
+export type TicketSource = 'manual' | 'email' | 'contact_form';
+
+export type TicketEnvironment = 'production' | 'staging' | 'local';
+
+export type TicketAppArea =
+  | 'auth'
+  | 'transactions'
+  | 'accounts'
+  | 'categories'
+  | 'receipts'
+  | 'exports'
+  | 'billing'
+  | 'settings'
+  | 'dashboard'
+  | 'unknown';
+
+export type TicketSeverity = 'minor' | 'major' | 'critical';
+
+export type TicketActivityType = 'note' | 'status' | 'assignment' | 'resolution';
+
+export type TicketActivityItem = {
+  id: string;
+  time: string;
+  author: string;
+  type: TicketActivityType;
+  text: string;
+};
 
 export type TicketRecord = {
   id: string;
   title: string;
   requester: string;
+  requesterEmail: string;
+  businessName: string;
   department: string;
   asset: string;
   assignedTech: string;
   status: TicketStatus;
   priority: TicketPriority;
   category: TicketCategory;
+  source: TicketSource;
+  environment: TicketEnvironment;
+  appArea: TicketAppArea;
+  severity: TicketSeverity;
   createdAt: string;
   updatedAt: string;
   dueAt: string;
+  details: string;
+  reproductionSteps: string;
+  expectedResult: string;
+  actualResult: string;
+  workaround: string;
+  relatedBusinessId: string;
+  relatedUserId: string;
+  relatedRelease: string;
+  tags: string[];
+  activity: TicketActivityItem[];
+};
+
+export type CreateTicketInput = {
+  title: string;
+  requester: string;
+  requesterEmail: string;
+  businessName: string;
+  department: string;
+  asset: string;
+  assignedTech: string;
+  priority: TicketPriority;
+  category: TicketCategory;
+  source: TicketSource;
+  environment: TicketEnvironment;
+  appArea: TicketAppArea;
+  severity: TicketSeverity;
+  dueAt: string;
+  details: string;
+  reproductionSteps: string;
+  expectedResult: string;
+  actualResult: string;
+  workaround: string;
+  relatedBusinessId: string;
+  relatedUserId: string;
+  relatedRelease: string;
+  tags: string[];
 };
