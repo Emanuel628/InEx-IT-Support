@@ -1,9 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ChangeEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketDetailSummary } from '@/features/tickets/components/TicketDetailSummary';
 import { TicketActivityTimeline } from '@/features/tickets/components/TicketActivityTimeline';
-import { getTicketById, updateTicketStatus } from '@/features/tickets/lib/ticketStore';
-import type { TicketStatus } from '@/types/tickets';
+import {
+  getTicketById,
+  updateTicketAssignment,
+  updateTicketPriority,
+  updateTicketStatus,
+} from '@/features/tickets/lib/ticketStore';
+import type { TicketPriority, TicketStatus } from '@/types/tickets';
 import '@/features/tickets/styles/tickets.css';
 
 const statusOptions: { value: TicketStatus; label: string }[] = [
@@ -12,6 +17,13 @@ const statusOptions: { value: TicketStatus; label: string }[] = [
   { value: 'waiting_on_user', label: 'Waiting on User' },
   { value: 'escalated', label: 'Escalated' },
   { value: 'resolved', label: 'Resolved' },
+];
+
+const priorityOptions: { value: TicketPriority; label: string }[] = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
+  { value: 'critical', label: 'Critical' },
 ];
 
 export function TicketDetailWorkspacePage() {
@@ -34,10 +46,29 @@ export function TicketDetailWorkspacePage() {
     );
   }
 
-  function handleStatusChange(nextStatus: TicketStatus) {
+  function refreshTicket() {
+    setVersion((current) => current + 1);
+  }
+
+  function handleStatusChange(event: ChangeEvent<HTMLSelectElement>) {
+    const nextStatus = event.target.value as TicketStatus;
     if (nextStatus === ticket.status) return;
     updateTicketStatus(ticket.id, nextStatus);
-    setVersion((current) => current + 1);
+    refreshTicket();
+  }
+
+  function handlePriorityChange(event: ChangeEvent<HTMLSelectElement>) {
+    const nextPriority = event.target.value as TicketPriority;
+    if (nextPriority === ticket.priority) return;
+    updateTicketPriority(ticket.id, nextPriority);
+    refreshTicket();
+  }
+
+  function handleAssignedTechBlur(event: ChangeEvent<HTMLInputElement>) {
+    const nextAssignedTech = event.target.value.trim();
+    if (nextAssignedTech === ticket.assignedTech) return;
+    updateTicketAssignment(ticket.id, nextAssignedTech);
+    refreshTicket();
   }
 
   return (
@@ -63,10 +94,7 @@ export function TicketDetailWorkspacePage() {
         <div className="ticket-form-grid">
           <label>
             Status
-            <select
-              value={ticket.status}
-              onChange={(event) => handleStatusChange(event.target.value as TicketStatus)}
-            >
+            <select value={ticket.status} onChange={handleStatusChange}>
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -77,12 +105,22 @@ export function TicketDetailWorkspacePage() {
 
           <label>
             Priority
-            <input type="text" value={ticket.priority} readOnly />
+            <select value={ticket.priority} onChange={handlePriorityChange}>
+              {priorityOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label>
             Assigned Tech
-            <input type="text" value={ticket.assignedTech} readOnly />
+            <input
+              type="text"
+              defaultValue={ticket.assignedTech}
+              onBlur={handleAssignedTechBlur}
+            />
           </label>
 
           <label>
