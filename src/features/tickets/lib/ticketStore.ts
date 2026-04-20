@@ -3,6 +3,7 @@ import { mockTickets } from '@/features/tickets/data/mockTickets';
 import type {
   CreateTicketInput,
   TicketActivityType,
+  TicketPriority,
   TicketRecord,
   TicketSource,
   TicketStatus,
@@ -107,6 +108,30 @@ function buildCreatedActivity(ticket: TicketRecord): TicketActivityItem[] {
   return items;
 }
 
+function nextActivityId(ticket: TicketRecord) {
+  return `${ticket.id}-act-${ticket.activity.length + 1}`;
+}
+
+function prependActivity(
+  ticket: TicketRecord,
+  entry: Omit<TicketActivityItem, 'id' | 'time'>,
+  updatedAt: string,
+): TicketRecord {
+  const activityEntry: TicketActivityItem = {
+    id: nextActivityId(ticket),
+    time: updatedAt,
+    author: entry.author,
+    type: entry.type,
+    text: entry.text,
+  };
+
+  return {
+    ...ticket,
+    updatedAt,
+    activity: [activityEntry, ...ticket.activity],
+  };
+}
+
 export function getTickets() {
   return readStoredTickets().sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
 }
@@ -159,25 +184,76 @@ export function createTicket(input: CreateTicketInput) {
 export function updateTicketStatus(ticketId: string, status: TicketStatus) {
   const tickets = readStoredTickets();
   const next = tickets.map((ticket) => {
-    if (ticket.id !== ticketId) {
+    if (ticket.id !== ticketId || ticket.status === status) {
       return ticket;
     }
 
     const updatedAt = nowIsoLike();
-    const statusEntry: TicketActivityItem = {
-      id: `${ticket.id}-act-${ticket.activity.length + 1}`,
-      time: updatedAt,
-      author: 'System',
-      type: 'status',
-      text: `Status changed from ${ticket.status.replace(/_/g, ' ')} to ${status.replace(/_/g, ' ')}.`,
-    };
-
-    return {
-      ...ticket,
-      status,
+    return prependActivity(
+      {
+        ...ticket,
+        status,
+      },
+      {
+        author: 'System',
+        type: 'status',
+        text: `Status changed from ${ticket.status.replace(/_/g, ' ')} to ${status.replace(/_/g, ' ')}.`,
+      },
       updatedAt,
-      activity: [statusEntry, ...ticket.activity],
-    };
+    );
+  });
+
+  writeStoredTickets(next);
+}
+
+export function updateTicketAssignment(ticketId: string, assignedTech: string) {
+  const tickets = readStoredTickets();
+  const cleanAssignedTech = assignedTech.trim() || 'Unassigned';
+
+  const next = tickets.map((ticket) => {
+    if (ticket.id !== ticketId || ticket.assignedTech === cleanAssignedTech) {
+      return ticket;
+    }
+
+    const updatedAt = nowIsoLike();
+    return prependActivity(
+      {
+        ...ticket,
+        assignedTech: cleanAssignedTech,
+      },
+      {
+        author: 'System',
+        type: 'assignment',
+        text: `Assignment changed from ${ticket.assignedTech || 'Unassigned'} to ${cleanAssignedTech}.`,
+      },
+      updatedAt,
+    );
+  });
+
+  writeStoredTickets(next);
+}
+
+export function updateTicketPriority(ticketId: string, priority: TicketPriority) {
+  const tickets = readStoredTickets();
+
+  const next = tickets.map((ticket) => {
+    if (ticket.id !== ticketId || ticket.priority === priority) {
+      return ticket;
+    }
+
+    const updatedAt = nowIsoLike();
+    return prependActivity(
+      {
+        ...ticket,
+        priority,
+      },
+      {
+        author: 'System',
+        type: 'note',
+        text: `Priority changed from ${ticket.priority} to ${priority}.`,
+      },
+      updatedAt,
+    );
   });
 
   writeStoredTickets(next);
