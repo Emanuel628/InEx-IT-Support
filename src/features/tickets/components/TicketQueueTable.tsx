@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { TicketPriority, TicketRecord, TicketStatus } from '@/types/tickets';
 
 function priorityClass(priority: TicketPriority) {
@@ -25,6 +26,17 @@ function statusLabel(status: TicketStatus) {
 }
 
 export function TicketQueueTable({ tickets }: { tickets: TicketRecord[] }) {
+  if (!tickets.length) {
+    return (
+      <div className="ticket-table-wrap">
+        <div className="ticket-empty-state">
+          <strong>No tickets yet.</strong>
+          <p>Create the first InEx Ledger support ticket to start the queue.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="ticket-table-wrap">
       <table className="ticket-table">
@@ -35,7 +47,7 @@ export function TicketQueueTable({ tickets }: { tickets: TicketRecord[] }) {
             <th>Status</th>
             <th>Title</th>
             <th>Requester</th>
-            <th>Asset</th>
+            <th>Area</th>
             <th>Assigned Tech</th>
             <th>Updated</th>
             <th>Due</th>
@@ -44,7 +56,9 @@ export function TicketQueueTable({ tickets }: { tickets: TicketRecord[] }) {
         <tbody>
           {tickets.map((ticket) => (
             <tr key={ticket.id}>
-              <td>{ticket.id}</td>
+              <td>
+                <Link to={`/tickets/${ticket.id}`}>{ticket.id}</Link>
+              </td>
               <td>
                 <span className={`ticket-badge ${priorityClass(ticket.priority)}`}>
                   {ticket.priority}
@@ -55,8 +69,12 @@ export function TicketQueueTable({ tickets }: { tickets: TicketRecord[] }) {
               </td>
               <td>
                 <div className="ticket-title-cell">
-                  <strong>{ticket.title}</strong>
-                  <span>{ticket.category} · {ticket.department}</span>
+                  <strong>
+                    <Link to={`/tickets/${ticket.id}`}>{ticket.title}</Link>
+                  </strong>
+                  <span>
+                    {ticket.category} · {ticket.appArea} · {ticket.environment}
+                  </span>
                 </div>
               </td>
               <td>{ticket.requester}</td>
