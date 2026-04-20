@@ -1,19 +1,32 @@
+import { Link } from 'react-router-dom';
 import { TicketStats } from '@/features/tickets/components/TicketStats';
 import { TicketQueueTable } from '@/features/tickets/components/TicketQueueTable';
-import { mockTickets } from '@/features/tickets/data/mockTickets';
+import { getTickets } from '@/features/tickets/lib/ticketStore';
+import '@/features/tickets/styles/tickets.css';
 
 export function TicketsWorkspacePage() {
-  return (
-    <section className="placeholder-page">
-      <h2>Tickets</h2>
-      <p>
-        First real ticket queue workspace using mock data. This is the screen that
-        should replace the placeholder Tickets page once the router is rewired.
-      </p>
+  const tickets = getTickets();
 
-      <TicketStats tickets={mockTickets} />
+  return (
+    <section className="ticket-workspace-page">
+      <div className="ticket-page-header">
+        <div>
+          <span className="ticket-page-eyebrow">Tickets</span>
+          <h2>Support Queue</h2>
+          <p>
+            Track InEx Ledger support issues across auth, receipts, exports,
+            billing, and data problems.
+          </p>
+        </div>
+
+        <Link to="/tickets/new" className="ticket-primary-action">
+          Create Ticket
+        </Link>
+      </div>
+
+      <TicketStats tickets={tickets} />
       <div style={{ height: 16 }} />
-      <TicketQueueTable tickets={mockTickets} />
+      <TicketQueueTable tickets={tickets} />
     </section>
   );
 }
