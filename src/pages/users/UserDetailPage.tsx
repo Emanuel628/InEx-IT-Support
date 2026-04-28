@@ -4,11 +4,11 @@ export function UserDetailPage() {
   return (
     <PlaceholderPage
       title="User Detail"
-      description="Full user support profile."
+      description="Support profile for one InEx Ledger user and their linked support history."
       cards={[
-        { title: 'Profile', body: 'Contact details, department, and location.' },
-        { title: 'Assets', body: 'Devices assigned to the user.' },
-        { title: 'Ticket History', body: 'Past and current support interactions.' },
+        { title: 'User Profile', body: 'Email, verification state, region, language, and subscription context.' },
+        { title: 'Linked Businesses', body: 'Review related businesses and account relationships.' },
+        { title: 'Support History', body: 'See current and past tickets, errors, and notes.' },
       ]}
     />
   );
