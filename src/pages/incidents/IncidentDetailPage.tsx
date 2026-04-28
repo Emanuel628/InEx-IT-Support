@@ -1,22 +1,30 @@
-import { useMemo, useState, type ChangeEvent } from 'react';
+import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
+import { getActivityByEntity } from '@/features/activity/lib/activityStore';
 import { getErrors } from '@/features/errors/lib/errorStore';
 import { getReleases } from '@/features/releases/lib/releaseStore';
 import { getResolutions } from '@/features/resolutions/lib/resolutionStore';
 import { getTickets } from '@/features/tickets/lib/ticketStore';
 import { INCIDENT_SEVERITIES, INCIDENT_STATUSES } from '@/constants/workflow';
 import { getIncidentById, updateIncident } from '@/features/incidents/lib/incidentStore';
-import type { IncidentEnvironment, IncidentSeverity, IncidentStatus } from '@/types/incidents';
+import type { IncidentEnvironment, IncidentSeverity, IncidentStatus, IncidentTimelineItem } from '@/types/incidents';
 import '@/features/tickets/styles/tickets.css';
+
+function nowIsoLike() {
+  return new Date().toISOString().slice(0, 16).replace('T', ' ');
+}
 
 export function IncidentDetailPage() {
   const { incidentId = '' } = useParams();
   const [version, setVersion] = useState(0);
+  const [timelineSummary, setTimelineSummary] = useState('');
+  const [timelineActor, setTimelineActor] = useState('System');
   const incident = useMemo(() => getIncidentById(incidentId), [incidentId, version]);
   const tickets = useMemo(() => getTickets().slice(0, 6), [version]);
   const errors = useMemo(() => getErrors().slice(0, 6), [version]);
   const releases = useMemo(() => getReleases().slice(0, 6), [version]);
   const resolutions = useMemo(() => getResolutions().slice(0, 6), [version]);
+  const incidentActivity = useMemo(() => getActivityByEntity('incident', incidentId).slice(0, 8), [incidentId, version]);
 
   function refresh() {
     setVersion((current) => current + 1);
@@ -46,6 +54,27 @@ export function IncidentDetailPage() {
       ? incident[key].filter((item) => item !== value)
       : [...incident[key], value];
     updateAndRefresh({ [key]: next } as Pick<typeof incident, typeof key>);
+  }
+
+  function addTimelineEntry(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const summary = timelineSummary.trim();
+    const actor = timelineActor.trim() || 'System';
+    if (!summary) {
+      return;
+    }
+
+    const timestamp = nowIsoLike();
+    const item: IncidentTimelineItem = {
+      id: `${incident.id}-timeline-${Date.now()}`,
+      timestamp,
+      actor,
+      summary,
+    };
+
+    updateAndRefresh({ timeline: [item, ...incident.timeline] });
+    setTimelineSummary('');
+    setTimelineActor('System');
   }
 
   return (
@@ -187,8 +216,23 @@ export function IncidentDetailPage() {
       <section className="ticket-detail-panel">
         <div className="ticket-section-header">
           <h3>Incident Timeline</h3>
-          <span>Review the current investigation timeline.</span>
+          <span>Review the investigation timeline and add new notes.</span>
         </div>
+        <form className="ticket-form-layout" onSubmit={addTimelineEntry}>
+          <div className="ticket-form-grid">
+            <label>
+              Actor
+              <input value={timelineActor} onChange={(event) => setTimelineActor(event.target.value)} />
+            </label>
+            <label>
+              Timeline Note
+              <input value={timelineSummary} onChange={(event) => setTimelineSummary(event.target.value)} placeholder="Added customer-facing workaround note" />
+            </label>
+          </div>
+          <div className="ticket-form-actions">
+            <button type="submit">Add Timeline Entry</button>
+          </div>
+        </form>
         <div className="ticket-detail-stack">
           {incident.timeline.length ? incident.timeline.map((item) => (
             <article key={item.id} className="ticket-activity-item">
@@ -199,6 +243,24 @@ export function IncidentDetailPage() {
               <p>{item.actor}</p>
             </article>
           )) : <p>No timeline items yet.</p>}
+        </div>
+      </section>
+
+      <section className="ticket-detail-panel">
+        <div className="ticket-section-header">
+          <h3>Recent Incident Activity</h3>
+          <span>Latest audit-style actions recorded for this incident.</span>
+        </div>
+        <div className="ticket-detail-stack">
+          {incidentActivity.length ? incidentActivity.map((item) => (
+            <article key={item.id} className="ticket-activity-item">
+              <div className="ticket-activity-meta">
+                <strong>{item.summary}</strong>
+                <span>{item.timestamp}</span>
+              </div>
+              <p>{item.actor}</p>
+            </article>
+          )) : <p>No incident activity yet.</p>}
         </div>
       </section>
     </section>
