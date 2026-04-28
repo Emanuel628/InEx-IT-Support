@@ -1,3 +1,4 @@
+import { addActivity } from '@/features/activity/lib/activityStore';
 import { mockErrors } from '@/features/errors/data/mockErrors';
 import { readLocalStore, writeLocalStore } from '@/lib/localStorageStore';
 import type { CreateErrorLogInput, ErrorLogRecord } from '@/types/errors';
@@ -29,6 +30,10 @@ function nextErrorId(existing: ErrorLogRecord[]) {
   return `ERR-${highest + 1}`;
 }
 
+function nowIsoLike() {
+  return new Date().toISOString().slice(0, 16).replace('T', ' ');
+}
+
 export function getErrors() {
   return readStoredErrors().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
@@ -39,17 +44,58 @@ export function getErrorById(errorId: string) {
 
 export function createError(input: CreateErrorLogInput) {
   const existing = readStoredErrors();
-  const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const timestamp = nowIsoLike();
   const record: ErrorLogRecord = { id: nextErrorId(existing), createdAt: timestamp, updatedAt: timestamp, ...input };
   const next = [record, ...existing];
   writeStoredErrors(next);
+
+  addActivity({
+    entityType: 'error',
+    entityId: record.id,
+    action: 'created',
+    actor: 'System',
+    summary: `Error ${record.id} was logged for ${record.appArea} in ${record.environment}.`,
+    timestamp,
+    metadata: {
+      severity: record.severity,
+      status: record.status,
+      source: record.source,
+    },
+  });
+
   return record;
 }
 
 export function updateError(errorId: string, updates: Partial<ErrorLogRecord>) {
-  const next = readStoredErrors().map((record) => record.id === errorId ? { ...record, ...updates, updatedAt: new Date().toISOString().slice(0, 16).replace('T', ' ') } : record);
+  const existing = readStoredErrors();
+  const previous = existing.find((record) => record.id === errorId) || null;
+  const timestamp = nowIsoLike();
+  const next = existing.map((record) => record.id === errorId ? { ...record, ...updates, updatedAt: timestamp } : record);
   writeStoredErrors(next);
-  return next.find((record) => record.id === errorId) || null;
+  const updated = next.find((record) => record.id === errorId) || null;
+
+  if (updated) {
+    const action = previous && previous.status !== updated.status ? 'status_changed' : 'updated';
+    const summary = previous && previous.status !== updated.status
+      ? `Error ${updated.id} status changed from ${previous.status} to ${updated.status}.`
+      : `Error ${updated.id} was updated.`;
+
+    addActivity({
+      entityType: 'error',
+      entityId: updated.id,
+      action,
+      actor: 'System',
+      summary,
+      timestamp,
+      metadata: {
+        severity: updated.severity,
+        status: updated.status,
+        source: updated.source,
+      },
+    });
+  }
+
+  return updated;
 }
 
 export function seedDemoData() {
