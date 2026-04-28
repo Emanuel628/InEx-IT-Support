@@ -4,11 +4,11 @@ export function DataPage() {
   return (
     <PlaceholderPage
       title="Data"
-      description="Import, export, and data utility workspace."
+      description="Import, export, reset, and utility workspace for local-first support data."
       cards={[
-        { title: 'Import', body: 'Bring in users, assets, or tickets later.' },
-        { title: 'Export', body: 'Download structured data for reporting or backup.' },
-        { title: 'Utilities', body: 'Prepare the app for local-first operations.' },
+        { title: 'Import', body: 'Bring in support records, settings, and local snapshots safely.' },
+        { title: 'Export', body: 'Download structured support data for transfer, reporting, or archive.' },
+        { title: 'Utilities', body: 'Prepare schema checks, reset-to-demo actions, and item counts.' },
       ]}
     />
   );
