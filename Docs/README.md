@@ -87,6 +87,9 @@ Key docs include:
 - `BUILD-PLAN.md`
 - `Docs/README.md`
 - `Docs/PRODUCTION-INTEGRATION-PLAN.md`
+- `Docs/USER-BUSINESS-LOOKUP-PLAN.md`
+- `Docs/BILLING-SUBSCRIPTION-CONTEXT-PLAN.md`
+- `Docs/ERROR-INGESTION-PLAN.md`
 
 ## Source of truth
 
