@@ -84,7 +84,7 @@ Project documentation lives in the `Docs/` folder.
 
 Key docs include:
 
-- `BUILD-PLAN.md`
+- `Docs/BUILD-PLAN.md`
 - `Docs/README.md`
 - `Docs/PRODUCTION-INTEGRATION-PLAN.md`
 - `Docs/USER-BUSINESS-LOOKUP-PLAN.md`
@@ -96,4 +96,4 @@ Key docs include:
 
 ## Source of truth
 
-The canonical build direction for the app lives in `BUILD-PLAN.md`.
+The canonical build direction for the app lives in `Docs/BUILD-PLAN.md`.
