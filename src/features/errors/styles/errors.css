@@ -78,6 +78,14 @@
   grid-template-columns: 2fr 1fr 1fr 1fr;
 }
 
+.error-filters-bar-wide {
+  grid-template-columns: minmax(260px, 2fr) repeat(5, minmax(150px, 1fr));
+}
+
+.error-filter-search {
+  grid-column: span 1;
+}
+
 .error-filter-group label,
 .error-form-layout label,
 .error-form-grid label {
@@ -132,6 +140,8 @@
 .error-title-cell {
   display: grid;
   gap: 4px;
+  color: inherit;
+  text-decoration: none;
 }
 
 .error-title-cell span,
@@ -216,6 +226,12 @@
   padding: 18px;
 }
 
+@media (max-width: 1200px) {
+  .error-filters-bar-wide {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+  }
+}
+
 @media (max-width: 1080px) {
   .error-filters-bar {
     grid-template-columns: 1fr 1fr;
@@ -228,7 +244,8 @@
     display: grid;
   }
 
-  .error-filters-bar {
+  .error-filters-bar,
+  .error-filters-bar-wide {
     grid-template-columns: 1fr;
   }
 }
