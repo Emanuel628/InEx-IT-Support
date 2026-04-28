@@ -8,13 +8,14 @@ export const TICKET_STATUSES: TicketStatus[] = [
   'waiting_on_user',
   'escalated',
   'resolved',
+  'archived',
 ];
 
 export const TICKET_PRIORITIES: TicketPriority[] = ['low', 'medium', 'high', 'critical'];
 
 export const TICKET_SEVERITIES: TicketSeverity[] = ['minor', 'major', 'critical'];
 
-export const TICKET_SOURCES: TicketSource[] = ['manual', 'email', 'contact_form'];
+export const TICKET_SOURCES: TicketSource[] = ['manual', 'email', 'contact_form', 'internal', 'error_log', 'incident'];
 
 export const TICKET_CATEGORIES: TicketCategory[] = [
   'bug',
@@ -26,9 +27,12 @@ export const TICKET_CATEGORIES: TicketCategory[] = [
   'ui_ux',
   'feature_request',
   'infrastructure',
+  'account_access',
+  'business_context',
+  'deployment',
 ];
 
-export const TICKET_ENVIRONMENTS: TicketEnvironment[] = ['production', 'staging', 'local'];
+export const TICKET_ENVIRONMENTS: TicketEnvironment[] = ['production', 'staging', 'local', 'development'];
 
 export const TICKET_APP_AREAS: TicketAppArea[] = [
   'auth',
@@ -40,6 +44,12 @@ export const TICKET_APP_AREAS: TicketAppArea[] = [
   'billing',
   'settings',
   'dashboard',
+  'onboarding',
+  'email',
+  'database',
+  'api',
+  'frontend',
+  'deployment',
   'unknown',
 ];
 
