@@ -11,7 +11,7 @@ const defaultSettings: SettingsRecord = {
   categories: ['bug', 'billing', 'exports', 'receipts', 'authentication', 'data_integrity', 'ui_ux', 'feature_request', 'infrastructure', 'account_access', 'business_context', 'deployment'],
   appAreas: ['auth', 'transactions', 'accounts', 'categories', 'receipts', 'exports', 'billing', 'settings', 'dashboard', 'onboarding', 'email', 'database', 'api', 'frontend', 'deployment', 'unknown'],
   environments: ['production', 'staging', 'local', 'development'],
-  sources: ['manual', 'email', 'contact_form', 'error_log', 'incident'],
+  sources: ['manual', 'email', 'contact_form', 'internal', 'error_log', 'incident'],
   statuses: ['new', 'in_progress', 'waiting_on_user', 'escalated', 'resolved', 'archived'],
   priorities: ['low', 'medium', 'high', 'critical'],
   localPreferences: {
