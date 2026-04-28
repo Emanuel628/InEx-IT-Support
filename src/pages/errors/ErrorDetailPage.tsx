@@ -1,5 +1,6 @@
 import { useMemo, useState, type ChangeEvent } from 'react';
 import { useParams } from 'react-router-dom';
+import { ErrorActivitySection } from '@/features/errors/components/ErrorActivitySection';
 import { ErrorLinkActions } from '@/features/errors/components/ErrorLinkActions';
 import { updateError, getErrorById } from '@/features/errors/lib/errorStore';
 import { getIncidents } from '@/features/incidents/lib/incidentStore';
@@ -278,6 +279,8 @@ export function ErrorDetailPage() {
           </label>
         </div>
       </section>
+
+      <ErrorActivitySection errorId={record.id} />
     </section>
   );
 }
