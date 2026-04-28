@@ -59,6 +59,14 @@ export function updateSettings(updates: Partial<SettingsRecord>) {
   return next;
 }
 
+export function seedDemoData() {
+  writeStoredSettings(defaultSettings);
+}
+
+export function clearData() {
+  writeStoredSettings(defaultSettings);
+}
+
 export function resetSettings() {
   writeStoredSettings(defaultSettings);
 }
