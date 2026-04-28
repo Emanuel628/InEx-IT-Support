@@ -6,15 +6,12 @@ import { getIncidents } from '@/features/incidents/lib/incidentStore';
 import { getKnowledgeArticles } from '@/features/knowledge/lib/knowledgeStore';
 import { getResolutions } from '@/features/resolutions/lib/resolutionStore';
 import { getReleases } from '@/features/releases/lib/releaseStore';
-import { TICKET_APP_AREAS, TICKET_CATEGORIES, TICKET_ENVIRONMENTS, TICKET_PRIORITIES, TICKET_SEVERITIES, TICKET_SOURCES } from '@/constants/workflow';
+import { getSettings } from '@/features/settings/lib/settingsStore';
+import { TICKET_PRIORITIES, TICKET_SEVERITIES } from '@/constants/workflow';
 import type {
   CreateTicketInput,
-  TicketAppArea,
-  TicketCategory,
-  TicketEnvironment,
   TicketPriority,
   TicketSeverity,
-  TicketSource,
 } from '@/types/tickets';
 
 type TicketFormState = CreateTicketInput & {
@@ -69,12 +66,20 @@ function labelize(value: string) {
 
 export function TicketCreateForm() {
   const navigate = useNavigate();
+  const settings = useMemo(() => getSettings(), []);
   const releases = useMemo(() => getReleases().slice(0, 6), []);
   const errors = useMemo(() => getErrors().slice(0, 6), []);
   const incidents = useMemo(() => getIncidents().slice(0, 6), []);
   const resolutions = useMemo(() => getResolutions().slice(0, 6), []);
   const knowledgeArticles = useMemo(() => getKnowledgeArticles().slice(0, 6), []);
-  const [form, setForm] = useState<TicketFormState>(initialState);
+  const [form, setForm] = useState<TicketFormState>({
+    ...initialState,
+    assignedTech: settings.defaultAssignee || 'Unassigned',
+    category: (settings.categories[0] || 'bug') as TicketFormState['category'],
+    source: (settings.sources[0] || 'manual') as TicketFormState['source'],
+    environment: (settings.environments[0] || 'production') as TicketFormState['environment'],
+    appArea: (settings.appAreas[0] || 'unknown') as TicketFormState['appArea'],
+  });
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -86,7 +91,14 @@ export function TicketCreateForm() {
   }
 
   function handleReset() {
-    setForm(initialState);
+    setForm({
+      ...initialState,
+      assignedTech: settings.defaultAssignee || 'Unassigned',
+      category: (settings.categories[0] || 'bug') as TicketFormState['category'],
+      source: (settings.sources[0] || 'manual') as TicketFormState['source'],
+      environment: (settings.environments[0] || 'production') as TicketFormState['environment'],
+      appArea: (settings.appAreas[0] || 'unknown') as TicketFormState['appArea'],
+    });
     setError('');
   }
 
@@ -212,19 +224,17 @@ export function TicketCreateForm() {
 
         <label>
           Assigned Tech
-          <input
-            name="assignedTech"
-            type="text"
-            value={form.assignedTech}
-            onChange={handleChange}
-            placeholder="Technician name"
-          />
+          <select name="assignedTech" value={form.assignedTech} onChange={handleChange}>
+            {['Unassigned', ...settings.technicians].map((value) => (
+              <option key={value} value={value}>{value}</option>
+            ))}
+          </select>
         </label>
 
         <label>
           Category
           <select name="category" value={form.category} onChange={handleChange}>
-            {TICKET_CATEGORIES.map((value) => (
+            {settings.categories.map((value) => (
               <option key={value} value={value}>{labelize(value)}</option>
             ))}
           </select>
@@ -242,7 +252,7 @@ export function TicketCreateForm() {
         <label>
           Source
           <select name="source" value={form.source} onChange={handleChange}>
-            {TICKET_SOURCES.map((value) => (
+            {settings.sources.map((value) => (
               <option key={value} value={value}>{labelize(value)}</option>
             ))}
           </select>
@@ -251,7 +261,7 @@ export function TicketCreateForm() {
         <label>
           Environment
           <select name="environment" value={form.environment} onChange={handleChange}>
-            {TICKET_ENVIRONMENTS.map((value) => (
+            {settings.environments.map((value) => (
               <option key={value} value={value}>{labelize(value)}</option>
             ))}
           </select>
@@ -260,7 +270,7 @@ export function TicketCreateForm() {
         <label>
           App Area
           <select name="appArea" value={form.appArea} onChange={handleChange}>
-            {TICKET_APP_AREAS.map((value) => (
+            {settings.appAreas.map((value) => (
               <option key={value} value={value}>{labelize(value)}</option>
             ))}
           </select>
