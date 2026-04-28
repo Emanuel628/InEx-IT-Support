@@ -2,10 +2,12 @@ export function Topbar() {
   return (
     <header className="topbar">
       <div>
-        <strong>Support Operations Console</strong>
-        <div className="topbar-meta">Scaffolded shell for tickets, users, assets, reporting, and admin workflows</div>
+        <strong>InEx Ledger Support Console</strong>
+        <div className="topbar-meta">
+          Local-first MVP for tickets, errors, incidents, business context, and support operations.
+        </div>
       </div>
-      <div className="topbar-meta">Local-first · React + Vite</div>
+      <div className="topbar-meta">Local-first MVP · React + Vite</div>
     </header>
   );
 }
