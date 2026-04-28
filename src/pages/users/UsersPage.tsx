@@ -4,11 +4,11 @@ export function UsersPage() {
   return (
     <PlaceholderPage
       title="Users"
-      description="Directory for employee lookup and support history."
+      description="Support-side user directory for InEx Ledger customers and account history."
       cards={[
-        { title: 'User Search', body: 'Find employees by name, email, or department.' },
-        { title: 'History', body: 'Review past tickets and recurring issues.' },
-        { title: 'Assignments', body: 'See linked devices and support ownership.' },
+        { title: 'User Search', body: 'Find users by name, email, plan, or region.' },
+        { title: 'Support History', body: 'Review linked tickets, errors, and prior follow-up.' },
+        { title: 'Business Context', body: 'See related businesses, verification state, and subscription context.' },
       ]}
     />
   );
