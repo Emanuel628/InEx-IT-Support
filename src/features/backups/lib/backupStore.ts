@@ -34,6 +34,10 @@ export function getBackups() {
   return readStoredBackups().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+export function getBackupById(backupId: string) {
+  return getBackups().find((record) => record.id === backupId) || null;
+}
+
 export function createBackup(input: Omit<BackupRecord, 'id'>) {
   const existing = readStoredBackups();
   const record: BackupRecord = { id: nextBackupId(existing), ...input };
@@ -42,9 +46,21 @@ export function createBackup(input: Omit<BackupRecord, 'id'>) {
   return record;
 }
 
+export function updateBackup(backupId: string, updates: Partial<BackupRecord>) {
+  const next = readStoredBackups().map((record) => (
+    record.id === backupId ? { ...record, ...updates } : record
+  ));
+  writeStoredBackups(next);
+  return next.find((record) => record.id === backupId) || null;
+}
+
 export function deleteBackup(backupId: string) {
   const next = readStoredBackups().filter((record) => record.id !== backupId);
   writeStoredBackups(next);
+}
+
+export function seedDemoData() {
+  writeStoredBackups(fallbackBackups);
 }
 
 export function clearData() {
