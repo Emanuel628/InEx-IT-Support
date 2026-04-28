@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getActivityByEntity } from '@/features/activity/lib/activityStore';
 import { getErrors } from '@/features/errors/lib/errorStore';
 import { getIncidents } from '@/features/incidents/lib/incidentStore';
 import { getKnowledgeArticles } from '@/features/knowledge/lib/knowledgeStore';
@@ -17,6 +18,7 @@ export function ResolutionDetailPage() {
   const incidents = useMemo(() => getIncidents(), [version]);
   const releases = useMemo(() => getReleases(), [version]);
   const knowledgeArticles = useMemo(() => getKnowledgeArticles(), [version]);
+  const resolutionActivity = useMemo(() => getActivityByEntity('resolution', resolutionId).slice(0, 8), [resolutionId, version]);
 
   function refresh() {
     setVersion((current) => current + 1);
@@ -135,6 +137,24 @@ export function ResolutionDetailPage() {
             <strong>Knowledge Articles</strong>
             <p>{linkedArticles.length ? linkedArticles.map((record) => `${record.id} — ${record.title}`).join(' | ') : '—'}</p>
           </div>
+        </div>
+      </section>
+
+      <section className="ticket-detail-panel">
+        <div className="ticket-section-header">
+          <h3>Recent Resolution Activity</h3>
+          <span>Latest audit-style actions recorded for this historical fix record.</span>
+        </div>
+        <div className="ticket-detail-stack">
+          {resolutionActivity.length ? resolutionActivity.map((item) => (
+            <article key={item.id} className="ticket-activity-item">
+              <div className="ticket-activity-meta">
+                <strong>{item.summary}</strong>
+                <span>{item.timestamp}</span>
+              </div>
+              <p>{item.actor}</p>
+            </article>
+          )) : <p>No resolution activity yet.</p>}
         </div>
       </section>
     </section>
