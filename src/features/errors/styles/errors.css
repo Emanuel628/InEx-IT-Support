@@ -211,6 +211,29 @@
   gap: 10px;
 }
 
+.error-activity-list {
+  display: grid;
+  gap: 12px;
+}
+
+.error-activity-item {
+  border-left: 2px solid rgba(248, 113, 113, 0.35);
+  padding-left: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.error-activity-item p,
+.error-activity-item small {
+  margin: 0;
+}
+
+.error-activity-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .error-detail-stack,
 .error-link-list,
 .error-empty-state {
