@@ -56,6 +56,12 @@ export function IncidentDetailPage() {
     updateAndRefresh({ [key]: next } as Pick<typeof incident, typeof key>);
   }
 
+  function toggleSingleLink(key: 'relatedReleaseId' | 'relatedResolutionId', value: string) {
+    updateAndRefresh({
+      [key]: incident[key] === value ? '' : value,
+    } as Pick<typeof incident, typeof key>);
+  }
+
   function addTimelineEntry(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const summary = timelineSummary.trim();
@@ -200,6 +206,20 @@ export function IncidentDetailPage() {
             {errors.map((error) => (
               <button key={error.id} type="button" onClick={() => toggleId('relatedErrorIds', error.id)}>
                 {incident.relatedErrorIds.includes(error.id) ? `Unlink ${error.id}` : `Link ${error.id}`}
+              </button>
+            ))}
+          </div>
+          <div className="incident-inline-actions">
+            {releases.map((release) => (
+              <button key={release.id} type="button" onClick={() => toggleSingleLink('relatedReleaseId', release.id)}>
+                {incident.relatedReleaseId === release.id ? `Unlink ${release.id}` : `Link ${release.id}`}
+              </button>
+            ))}
+          </div>
+          <div className="incident-inline-actions">
+            {resolutions.map((resolution) => (
+              <button key={resolution.id} type="button" onClick={() => toggleSingleLink('relatedResolutionId', resolution.id)}>
+                {incident.relatedResolutionId === resolution.id ? `Unlink ${resolution.id}` : `Link ${resolution.id}`}
               </button>
             ))}
           </div>
