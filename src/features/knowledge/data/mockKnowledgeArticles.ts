@@ -1,0 +1,58 @@
+import type { KnowledgeArticleRecord } from '@/types/knowledge';
+
+export const mockKnowledgeArticles: KnowledgeArticleRecord[] = [
+  {
+    id: 'KB-6001',
+    title: 'Missing email verification after registration',
+    articleType: 'troubleshooting',
+    category: 'authentication',
+    appArea: 'auth',
+    summary: 'Checklist for diagnosing missing verification email cases.',
+    symptoms: 'User can register but does not receive the verification email.',
+    cause: 'Delivery failure, resend configuration issue, or email event not firing.',
+    troubleshootingSteps: [
+      'Confirm the user record exists.',
+      'Check resend and email delivery logs.',
+      'Verify whether the resend endpoint was called successfully.',
+    ],
+    resolutionSteps: [
+      'Retry verification send after config check.',
+      'Confirm delivery or manually assist the user if needed.',
+    ],
+    escalationRules: 'Escalate if delivery is failing across multiple users.',
+    customerResponseTemplate: 'We are reviewing the verification email delivery path and will update you shortly.',
+    internalNotes: 'Common after auth and email deployment changes.',
+    relatedTicketIds: ['INC-1042'],
+    relatedResolutionIds: [],
+    tags: ['auth', 'email', 'verification'],
+    createdAt: '2026-04-09 13:15',
+    updatedAt: '2026-04-11 09:05',
+  },
+  {
+    id: 'KB-6002',
+    title: 'Receipts page missing business context',
+    articleType: 'known_issue',
+    category: 'business_context',
+    appArea: 'receipts',
+    summary: 'Troubleshooting flow for receipts routes that fail to resolve the active business.',
+    symptoms: 'Receipts workflow shows missing business context or refuses upload.',
+    cause: 'Business resolution helper did not align with current user context.',
+    troubleshootingSteps: [
+      'Confirm affected user and business relationship.',
+      'Review business resolver behavior in the current release.',
+      'Retry after refresh and account context reload.',
+    ],
+    resolutionSteps: [
+      'Apply resolver fix and verify upload flow.',
+      'Confirm receipts page now resolves business automatically.',
+    ],
+    escalationRules: 'Escalate if receipts uploads fail across multiple businesses.',
+    customerResponseTemplate: 'We are checking the account context path tied to your receipts workflow.',
+    internalNotes: 'Often appears with receipt business context regressions.',
+    relatedTicketIds: ['INC-1041'],
+    relatedResolutionIds: [],
+    tags: ['receipts', 'business-context'],
+    createdAt: '2026-04-09 11:50',
+    updatedAt: '2026-04-11 08:12',
+  },
+];
