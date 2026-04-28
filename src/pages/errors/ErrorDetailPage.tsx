@@ -3,9 +3,10 @@ import { useParams } from 'react-router-dom';
 import { updateError, getErrorById } from '@/features/errors/lib/errorStore';
 import { getIncidents } from '@/features/incidents/lib/incidentStore';
 import { getResolutions } from '@/features/resolutions/lib/resolutionStore';
+import { getReleases } from '@/features/releases/lib/releaseStore';
 import { getTickets } from '@/features/tickets/lib/ticketStore';
-import { ERROR_LOG_SEVERITIES, ERROR_LOG_STATUSES } from '@/constants/workflow';
-import type { ErrorLogSeverity, ErrorLogStatus } from '@/types/errors';
+import { ERROR_LOG_APP_AREAS, ERROR_LOG_ENVIRONMENTS, ERROR_LOG_SEVERITIES, ERROR_LOG_SOURCES, ERROR_LOG_STATUSES } from '@/constants/workflow';
+import type { ErrorLogAppArea, ErrorLogEnvironment, ErrorLogSeverity, ErrorLogSource, ErrorLogStatus } from '@/types/errors';
 import '@/features/errors/styles/errors.css';
 
 export function ErrorDetailPage() {
@@ -15,6 +16,7 @@ export function ErrorDetailPage() {
   const tickets = useMemo(() => getTickets().slice(0, 6), [version]);
   const incidents = useMemo(() => getIncidents().slice(0, 6), [version]);
   const resolutions = useMemo(() => getResolutions().slice(0, 6), [version]);
+  const releases = useMemo(() => getReleases().slice(0, 6), [version]);
 
   function refresh() {
     setVersion((current) => current + 1);
@@ -34,31 +36,55 @@ export function ErrorDetailPage() {
     );
   }
 
-  function handleStatusChange(event: ChangeEvent<HTMLSelectElement>) {
-    updateError(record.id, { status: event.target.value as ErrorLogStatus });
+  function updateAndRefresh(updates: Partial<typeof record>) {
+    updateError(record.id, updates);
     refresh();
+  }
+
+  function handleStatusChange(event: ChangeEvent<HTMLSelectElement>) {
+    updateAndRefresh({ status: event.target.value as ErrorLogStatus });
   }
 
   function handleSeverityChange(event: ChangeEvent<HTMLSelectElement>) {
-    updateError(record.id, { severity: event.target.value as ErrorLogSeverity });
-    refresh();
+    updateAndRefresh({ severity: event.target.value as ErrorLogSeverity });
+  }
+
+  function handleSourceChange(event: ChangeEvent<HTMLSelectElement>) {
+    updateAndRefresh({ source: event.target.value as ErrorLogSource });
+  }
+
+  function handleEnvironmentChange(event: ChangeEvent<HTMLSelectElement>) {
+    updateAndRefresh({ environment: event.target.value as ErrorLogEnvironment });
+  }
+
+  function handleAppAreaChange(event: ChangeEvent<HTMLSelectElement>) {
+    updateAndRefresh({ appArea: event.target.value as ErrorLogAppArea });
   }
 
   function handleLinkedTicketBlur(event: ChangeEvent<HTMLInputElement>) {
-    updateError(record.id, {
+    updateAndRefresh({
       relatedTicketIds: event.target.value.split(',').map((value) => value.trim()).filter(Boolean),
     });
-    refresh();
   }
 
-  function handleSimpleBlur<K extends 'relatedIncidentId' | 'relatedResolutionId' | 'notes'>(key: K, value: string) {
-    updateError(record.id, { [key]: value.trim() } as Pick<typeof record, K>);
-    refresh();
+  function handleSimpleBlur<K extends 'relatedIncidentId' | 'relatedResolutionId' | 'relatedReleaseId' | 'notes' | 'message' | 'rawLog' | 'stackTrace' | 'affectedUserId' | 'affectedBusinessId'>(key: K, value: string) {
+    updateAndRefresh({ [key]: value.trim() } as Pick<typeof record, K>);
+  }
+
+  function handleOccurrenceBlur(event: ChangeEvent<HTMLInputElement>) {
+    updateAndRefresh({ occurrenceCount: Number(event.target.value) || 1 });
+  }
+
+  function handleTimeBlur<K extends 'firstSeenAt' | 'lastSeenAt'>(key: K, value: string) {
+    updateAndRefresh({ [key]: value } as Pick<typeof record, K>);
+  }
+
+  function handleTagsBlur(event: ChangeEvent<HTMLInputElement>) {
+    updateAndRefresh({ tags: event.target.value.split(',').map((value) => value.trim()).filter(Boolean) });
   }
 
   function setQuickStatus(nextStatus: ErrorLogStatus) {
-    updateError(record.id, { status: nextStatus });
-    refresh();
+    updateAndRefresh({ status: nextStatus });
   }
 
   return (
@@ -83,7 +109,7 @@ export function ErrorDetailPage() {
       <section className="error-panel">
         <div className="error-section-header">
           <h3>Error Controls</h3>
-          <span>Update tracking state and support links</span>
+          <span>Update tracking state, triage context, and support links</span>
         </div>
 
         <div className="error-form-grid">
@@ -100,6 +126,36 @@ export function ErrorDetailPage() {
             </select>
           </label>
           <label>
+            Source
+            <select value={record.source} onChange={handleSourceChange}>
+              {ERROR_LOG_SOURCES.map((value) => <option key={value} value={value}>{value}</option>)}
+            </select>
+          </label>
+          <label>
+            Environment
+            <select value={record.environment} onChange={handleEnvironmentChange}>
+              {ERROR_LOG_ENVIRONMENTS.map((value) => <option key={value} value={value}>{value}</option>)}
+            </select>
+          </label>
+          <label>
+            App Area
+            <select value={record.appArea} onChange={handleAppAreaChange}>
+              {ERROR_LOG_APP_AREAS.map((value) => <option key={value} value={value}>{value}</option>)}
+            </select>
+          </label>
+          <label>
+            Occurrence Count
+            <input type="number" min={1} defaultValue={record.occurrenceCount} onBlur={handleOccurrenceBlur} />
+          </label>
+          <label>
+            First Seen
+            <input defaultValue={record.firstSeenAt} onBlur={(event) => handleTimeBlur('firstSeenAt', event.target.value)} />
+          </label>
+          <label>
+            Last Seen
+            <input defaultValue={record.lastSeenAt} onBlur={(event) => handleTimeBlur('lastSeenAt', event.target.value)} />
+          </label>
+          <label>
             Related Ticket IDs
             <input defaultValue={record.relatedTicketIds.join(', ')} onBlur={handleLinkedTicketBlur} />
           </label>
@@ -111,6 +167,10 @@ export function ErrorDetailPage() {
             Related Resolution ID
             <input defaultValue={record.relatedResolutionId} onBlur={(event) => handleSimpleBlur('relatedResolutionId', event.target.value)} />
           </label>
+          <label>
+            Related Release ID
+            <input defaultValue={record.relatedReleaseId} onBlur={(event) => handleSimpleBlur('relatedReleaseId', event.target.value)} />
+          </label>
         </div>
 
         <div className="error-link-list">
@@ -118,6 +178,7 @@ export function ErrorDetailPage() {
           <small>Tickets: {tickets.map((ticket) => ticket.id).join(', ') || '—'}</small>
           <small>Incidents: {incidents.map((incident) => incident.id).join(', ') || '—'}</small>
           <small>Resolutions: {resolutions.map((resolution) => resolution.id).join(', ') || '—'}</small>
+          <small>Releases: {releases.map((release) => release.id).join(', ') || '—'}</small>
         </div>
 
         <div className="error-inline-actions">
@@ -136,22 +197,26 @@ export function ErrorDetailPage() {
         </div>
 
         <div className="error-detail-stack">
-          <div>
-            <strong>Message</strong>
-            <p>{record.message || '—'}</p>
-          </div>
-          <div>
-            <strong>Raw Log</strong>
-            <p>{record.rawLog || '—'}</p>
-          </div>
-          <div>
-            <strong>Stack Trace</strong>
-            <p>{record.stackTrace || '—'}</p>
-          </div>
-          <div>
-            <strong>Affected User / Business</strong>
-            <p>{record.affectedUserId || '—'} · {record.affectedBusinessId || '—'}</p>
-          </div>
+          <label>
+            Message
+            <textarea rows={3} defaultValue={record.message} onBlur={(event) => handleSimpleBlur('message', event.target.value)} />
+          </label>
+          <label>
+            Raw Log
+            <textarea rows={5} defaultValue={record.rawLog} onBlur={(event) => handleSimpleBlur('rawLog', event.target.value)} />
+          </label>
+          <label>
+            Stack Trace
+            <textarea rows={5} defaultValue={record.stackTrace} onBlur={(event) => handleSimpleBlur('stackTrace', event.target.value)} />
+          </label>
+          <label>
+            Affected User ID
+            <input defaultValue={record.affectedUserId} onBlur={(event) => handleSimpleBlur('affectedUserId', event.target.value)} />
+          </label>
+          <label>
+            Affected Business ID
+            <input defaultValue={record.affectedBusinessId} onBlur={(event) => handleSimpleBlur('affectedBusinessId', event.target.value)} />
+          </label>
           <div className="error-link-list">
             <strong>Linked Support Records</strong>
             <span>Tickets: {record.relatedTicketIds.length ? record.relatedTicketIds.join(', ') : '—'}</span>
@@ -163,10 +228,10 @@ export function ErrorDetailPage() {
             Internal Notes
             <textarea rows={5} defaultValue={record.notes} onBlur={(event) => handleSimpleBlur('notes', event.target.value)} />
           </label>
-          <div>
-            <strong>Tags</strong>
-            <p>{record.tags.length ? record.tags.join(', ') : '—'}</p>
-          </div>
+          <label>
+            Tags
+            <input defaultValue={record.tags.join(', ')} onBlur={handleTagsBlur} />
+          </label>
         </div>
       </section>
     </section>
