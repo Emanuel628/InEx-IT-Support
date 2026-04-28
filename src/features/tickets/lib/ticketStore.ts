@@ -152,6 +152,10 @@ export function createTicket(input: CreateTicketInput) {
     relatedBusinessId: input.relatedBusinessId.trim(),
     relatedUserId: input.relatedUserId.trim(),
     relatedRelease: input.relatedRelease.trim(),
+    relatedErrorIds: input.relatedErrorIds,
+    relatedIncidentId: input.relatedIncidentId.trim(),
+    relatedResolutionId: input.relatedResolutionId.trim(),
+    relatedKnowledgeArticleIds: input.relatedKnowledgeArticleIds,
     tags: input.tags,
     activity: [],
   };
@@ -264,6 +268,8 @@ export function getSourceLabel(source: TicketSource) {
       return 'Contact form';
     case 'manual':
       return 'Manual';
+    case 'error_log':
+      return 'Error log';
     default:
       return source.charAt(0).toUpperCase() + source.slice(1);
   }
