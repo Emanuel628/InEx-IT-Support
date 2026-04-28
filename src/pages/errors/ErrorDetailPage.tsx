@@ -1,5 +1,6 @@
 import { useMemo, useState, type ChangeEvent } from 'react';
 import { useParams } from 'react-router-dom';
+import { ErrorLinkActions } from '@/features/errors/components/ErrorLinkActions';
 import { updateError, getErrorById } from '@/features/errors/lib/errorStore';
 import { getIncidents } from '@/features/incidents/lib/incidentStore';
 import { getResolutions } from '@/features/resolutions/lib/resolutionStore';
@@ -196,53 +197,33 @@ export function ErrorDetailPage() {
           <small>Use the buttons below to link or unlink related records quickly.</small>
         </div>
 
-        <div className="error-inline-actions">
-          {tickets.map((ticket) => (
-            <button
-              key={ticket.id}
-              type="button"
-              onClick={() => toggleTicketLink(ticket.id)}
-            >
-              {record.relatedTicketIds.includes(ticket.id) ? `Unlink ${ticket.id}` : `Link ${ticket.id}`}
-            </button>
-          ))}
-        </div>
+        <ErrorLinkActions
+          title="Tickets"
+          records={tickets}
+          activeIds={record.relatedTicketIds}
+          onToggle={toggleTicketLink}
+        />
 
-        <div className="error-inline-actions">
-          {incidents.map((incident) => (
-            <button
-              key={incident.id}
-              type="button"
-              onClick={() => toggleSingleLink('relatedIncidentId', incident.id)}
-            >
-              {record.relatedIncidentId === incident.id ? `Unlink ${incident.id}` : `Link ${incident.id}`}
-            </button>
-          ))}
-        </div>
+        <ErrorLinkActions
+          title="Incidents"
+          records={incidents}
+          activeIds={record.relatedIncidentId ? [record.relatedIncidentId] : []}
+          onToggle={(id) => toggleSingleLink('relatedIncidentId', id)}
+        />
 
-        <div className="error-inline-actions">
-          {resolutions.map((resolution) => (
-            <button
-              key={resolution.id}
-              type="button"
-              onClick={() => toggleSingleLink('relatedResolutionId', resolution.id)}
-            >
-              {record.relatedResolutionId === resolution.id ? `Unlink ${resolution.id}` : `Link ${resolution.id}`}
-            </button>
-          ))}
-        </div>
+        <ErrorLinkActions
+          title="Resolutions"
+          records={resolutions}
+          activeIds={record.relatedResolutionId ? [record.relatedResolutionId] : []}
+          onToggle={(id) => toggleSingleLink('relatedResolutionId', id)}
+        />
 
-        <div className="error-inline-actions">
-          {releases.map((release) => (
-            <button
-              key={release.id}
-              type="button"
-              onClick={() => toggleSingleLink('relatedReleaseId', release.id)}
-            >
-              {record.relatedReleaseId === release.id ? `Unlink ${release.id}` : `Link ${release.id}`}
-            </button>
-          ))}
-        </div>
+        <ErrorLinkActions
+          title="Releases"
+          records={releases}
+          activeIds={record.relatedReleaseId ? [record.relatedReleaseId] : []}
+          onToggle={(id) => toggleSingleLink('relatedReleaseId', id)}
+        />
 
         <div className="error-inline-actions">
           <button type="button" onClick={() => setQuickStatus('linked_to_ticket')}>Link to Ticket</button>
