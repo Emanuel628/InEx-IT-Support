@@ -1,5 +1,6 @@
 import type { TicketActivityItem } from '@/features/tickets/data/mockTicketActivity';
 import { mockTickets } from '@/features/tickets/data/mockTickets';
+import { readLocalStore, writeLocalStore } from '@/lib/localStorageStore';
 import type {
   CreateTicketInput,
   TicketActivityType,
@@ -10,21 +11,19 @@ import type {
 } from '@/types/tickets';
 
 const STORAGE_KEY = 'inex-it-support:tickets';
-
-function canUseStorage() {
-  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
-}
+const SCHEMA_VERSION_KEY = 'inex-it-support:schema-version';
+const SCHEMA_VERSION_VALUE = '1';
 
 function nowIsoLike() {
   return new Date().toISOString().slice(0, 16).replace('T', ' ');
 }
 
-function normalizeTickets(raw: unknown): TicketRecord[] {
+function normalizeTickets(raw: unknown): raw is TicketRecord[] {
   if (!Array.isArray(raw)) {
-    return [];
+    return false;
   }
 
-  return raw.filter((item): item is TicketRecord => {
+  return raw.every((item) => {
     return Boolean(item)
       && typeof item === 'object'
       && typeof (item as TicketRecord).id === 'string'
@@ -33,34 +32,17 @@ function normalizeTickets(raw: unknown): TicketRecord[] {
 }
 
 function readStoredTickets(): TicketRecord[] {
-  if (!canUseStorage()) {
-    return mockTickets;
-  }
-
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(mockTickets));
-      return mockTickets;
-    }
-
-    const parsed = JSON.parse(raw) as unknown;
-    const tickets = normalizeTickets(parsed);
-    if (!tickets.length) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(mockTickets));
-      return mockTickets;
-    }
-    return tickets;
-  } catch {
-    return mockTickets;
-  }
+  return readLocalStore<TicketRecord[]>({
+    storageKey: STORAGE_KEY,
+    fallbackValue: mockTickets,
+    schemaVersionKey: SCHEMA_VERSION_KEY,
+    schemaVersionValue: SCHEMA_VERSION_VALUE,
+    validate: normalizeTickets,
+  });
 }
 
 function writeStoredTickets(tickets: TicketRecord[]) {
-  if (!canUseStorage()) {
-    return;
-  }
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+  writeLocalStore(STORAGE_KEY, tickets);
 }
 
 function nextTicketId(existing: TicketRecord[]) {
