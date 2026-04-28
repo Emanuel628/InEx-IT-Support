@@ -1,6 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createError } from '@/features/errors/lib/errorStore';
+import { getIncidents } from '@/features/incidents/lib/incidentStore';
+import { getResolutions } from '@/features/resolutions/lib/resolutionStore';
+import { getTickets } from '@/features/tickets/lib/ticketStore';
 import { ERROR_LOG_APP_AREAS, ERROR_LOG_ENVIRONMENTS, ERROR_LOG_SEVERITIES, ERROR_LOG_SOURCES, ERROR_LOG_STATUSES } from '@/constants/workflow';
 import type { CreateErrorLogInput, ErrorLogAppArea, ErrorLogEnvironment, ErrorLogSeverity, ErrorLogSource, ErrorLogStatus } from '@/types/errors';
 import '@/features/errors/styles/errors.css';
@@ -34,6 +37,9 @@ function nowIsoLike() {
 
 export function CreateErrorPage() {
   const navigate = useNavigate();
+  const tickets = useMemo(() => getTickets().slice(0, 6), []);
+  const incidents = useMemo(() => getIncidents().slice(0, 6), []);
+  const resolutions = useMemo(() => getResolutions().slice(0, 6), []);
   const [form, setForm] = useState<CreateErrorLogInput>({
     ...initialForm,
     firstSeenAt: nowIsoLike(),
@@ -154,6 +160,13 @@ export function CreateErrorPage() {
               Related Release ID
               <input value={form.relatedReleaseId} onChange={(event) => setForm((current) => ({ ...current, relatedReleaseId: event.target.value }))} />
             </label>
+          </div>
+
+          <div className="error-link-list">
+            <strong>Available link targets</strong>
+            <small>Tickets: {tickets.map((ticket) => ticket.id).join(', ') || '—'}</small>
+            <small>Incidents: {incidents.map((incident) => incident.id).join(', ') || '—'}</small>
+            <small>Resolutions: {resolutions.map((resolution) => resolution.id).join(', ') || '—'}</small>
           </div>
 
           <label>
