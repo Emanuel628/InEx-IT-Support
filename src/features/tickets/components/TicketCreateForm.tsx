@@ -1,6 +1,12 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createTicket } from '@/features/tickets/lib/ticketStore';
+import { getErrors } from '@/features/errors/lib/errorStore';
+import { getIncidents } from '@/features/incidents/lib/incidentStore';
+import { getKnowledgeArticles } from '@/features/knowledge/lib/knowledgeStore';
+import { getResolutions } from '@/features/resolutions/lib/resolutionStore';
+import { getReleases } from '@/features/releases/lib/releaseStore';
+import { TICKET_APP_AREAS, TICKET_CATEGORIES, TICKET_ENVIRONMENTS, TICKET_PRIORITIES, TICKET_SEVERITIES, TICKET_SOURCES } from '@/constants/workflow';
 import type {
   CreateTicketInput,
   TicketAppArea,
@@ -13,14 +19,16 @@ import type {
 
 type TicketFormState = CreateTicketInput & {
   tagsText: string;
+  relatedErrorIdsText: string;
+  relatedKnowledgeArticleIdsText: string;
 };
 
 const initialState: TicketFormState = {
   title: '',
   requester: '',
   requesterEmail: '',
-  businessName: 'InEx Ledger',
-  department: 'Product',
+  businessName: '',
+  department: 'Customer Support',
   asset: '',
   assignedTech: 'Evelyn',
   priority: 'medium',
@@ -37,70 +45,35 @@ const initialState: TicketFormState = {
   workaround: '',
   relatedBusinessId: '',
   relatedUserId: '',
-  relatedRelease: 'v1',
+  relatedRelease: '',
+  relatedErrorIds: [],
+  relatedIncidentId: '',
+  relatedResolutionId: '',
+  relatedKnowledgeArticleIds: [],
   tags: [],
   tagsText: '',
+  relatedErrorIdsText: '',
+  relatedKnowledgeArticleIdsText: '',
 };
 
-const categoryOptions: { value: TicketCategory; label: string }[] = [
-  { value: 'bug', label: 'Bug' },
-  { value: 'billing', label: 'Billing' },
-  { value: 'exports', label: 'Exports' },
-  { value: 'receipts', label: 'Receipts' },
-  { value: 'authentication', label: 'Authentication' },
-  { value: 'data_integrity', label: 'Data Integrity' },
-  { value: 'ui_ux', label: 'UI / UX' },
-  { value: 'feature_request', label: 'Feature Request' },
-  { value: 'infrastructure', label: 'Infrastructure' },
-];
-
-const priorityOptions: { value: TicketPriority; label: string }[] = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'critical', label: 'Critical' },
-];
-
-const sourceOptions: { value: TicketSource; label: string }[] = [
-  { value: 'manual', label: 'Manual' },
-  { value: 'email', label: 'Email' },
-  { value: 'contact_form', label: 'Contact Form' },
-];
-
-const environmentOptions: { value: TicketEnvironment; label: string }[] = [
-  { value: 'production', label: 'Production' },
-  { value: 'staging', label: 'Staging' },
-  { value: 'local', label: 'Local' },
-];
-
-const appAreaOptions: { value: TicketAppArea; label: string }[] = [
-  { value: 'auth', label: 'Auth' },
-  { value: 'transactions', label: 'Transactions' },
-  { value: 'accounts', label: 'Accounts' },
-  { value: 'categories', label: 'Categories' },
-  { value: 'receipts', label: 'Receipts' },
-  { value: 'exports', label: 'Exports' },
-  { value: 'billing', label: 'Billing' },
-  { value: 'settings', label: 'Settings' },
-  { value: 'dashboard', label: 'Dashboard' },
-  { value: 'unknown', label: 'Unknown' },
-];
-
-const severityOptions: { value: TicketSeverity; label: string }[] = [
-  { value: 'minor', label: 'Minor' },
-  { value: 'major', label: 'Major' },
-  { value: 'critical', label: 'Critical' },
-];
-
-function toTags(value: string) {
+function toCommaList(value: string) {
   return value
     .split(',')
-    .map((tag) => tag.trim())
+    .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function labelize(value: string) {
+  return value.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export function TicketCreateForm() {
   const navigate = useNavigate();
+  const releases = useMemo(() => getReleases().slice(0, 6), []);
+  const errors = useMemo(() => getErrors().slice(0, 6), []);
+  const incidents = useMemo(() => getIncidents().slice(0, 6), []);
+  const resolutions = useMemo(() => getResolutions().slice(0, 6), []);
+  const knowledgeArticles = useMemo(() => getKnowledgeArticles().slice(0, 6), []);
   const [form, setForm] = useState<TicketFormState>(initialState);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,7 +124,11 @@ export function TicketCreateForm() {
       relatedBusinessId: form.relatedBusinessId,
       relatedUserId: form.relatedUserId,
       relatedRelease: form.relatedRelease,
-      tags: toTags(form.tagsText),
+      relatedErrorIds: toCommaList(form.relatedErrorIdsText),
+      relatedIncidentId: form.relatedIncidentId,
+      relatedResolutionId: form.relatedResolutionId,
+      relatedKnowledgeArticleIds: toCommaList(form.relatedKnowledgeArticleIdsText),
+      tags: toCommaList(form.tagsText),
     };
   }
 
@@ -207,7 +184,7 @@ export function TicketCreateForm() {
             type="text"
             value={form.businessName}
             onChange={handleChange}
-            placeholder="Business or app name"
+            placeholder="Affected business or account name"
           />
         </label>
 
@@ -218,18 +195,18 @@ export function TicketCreateForm() {
             type="text"
             value={form.department}
             onChange={handleChange}
-            placeholder="Department"
+            placeholder="Customer Support"
           />
         </label>
 
         <label>
-          Asset / Surface
+          Product Surface
           <input
             name="asset"
             type="text"
             value={form.asset}
             onChange={handleChange}
-            placeholder="Page, route, feature, device, or service"
+            placeholder="Page, route, workflow, or service"
           />
         </label>
 
@@ -247,10 +224,8 @@ export function TicketCreateForm() {
         <label>
           Category
           <select name="category" value={form.category} onChange={handleChange}>
-            {categoryOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
+            {TICKET_CATEGORIES.map((value) => (
+              <option key={value} value={value}>{labelize(value)}</option>
             ))}
           </select>
         </label>
@@ -258,10 +233,8 @@ export function TicketCreateForm() {
         <label>
           Priority
           <select name="priority" value={form.priority} onChange={handleChange}>
-            {priorityOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
+            {TICKET_PRIORITIES.map((value) => (
+              <option key={value} value={value}>{labelize(value)}</option>
             ))}
           </select>
         </label>
@@ -269,10 +242,8 @@ export function TicketCreateForm() {
         <label>
           Source
           <select name="source" value={form.source} onChange={handleChange}>
-            {sourceOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
+            {TICKET_SOURCES.map((value) => (
+              <option key={value} value={value}>{labelize(value)}</option>
             ))}
           </select>
         </label>
@@ -280,10 +251,8 @@ export function TicketCreateForm() {
         <label>
           Environment
           <select name="environment" value={form.environment} onChange={handleChange}>
-            {environmentOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
+            {TICKET_ENVIRONMENTS.map((value) => (
+              <option key={value} value={value}>{labelize(value)}</option>
             ))}
           </select>
         </label>
@@ -291,10 +260,8 @@ export function TicketCreateForm() {
         <label>
           App Area
           <select name="appArea" value={form.appArea} onChange={handleChange}>
-            {appAreaOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
+            {TICKET_APP_AREAS.map((value) => (
+              <option key={value} value={value}>{labelize(value)}</option>
             ))}
           </select>
         </label>
@@ -302,10 +269,8 @@ export function TicketCreateForm() {
         <label>
           Severity
           <select name="severity" value={form.severity} onChange={handleChange}>
-            {severityOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
+            {TICKET_SEVERITIES.map((value) => (
+              <option key={value} value={value}>{labelize(value)}</option>
             ))}
           </select>
         </label>
@@ -316,13 +281,13 @@ export function TicketCreateForm() {
         </label>
 
         <label>
-          Release
+          Related Release ID
           <input
             name="relatedRelease"
             type="text"
             value={form.relatedRelease}
             onChange={handleChange}
-            placeholder="v1"
+            placeholder="REL-3004"
           />
         </label>
 
@@ -333,7 +298,7 @@ export function TicketCreateForm() {
             type="text"
             value={form.relatedBusinessId}
             onChange={handleChange}
-            placeholder="Optional"
+            placeholder="BIZ-2001"
           />
         </label>
 
@@ -344,9 +309,42 @@ export function TicketCreateForm() {
             type="text"
             value={form.relatedUserId}
             onChange={handleChange}
-            placeholder="Optional"
+            placeholder="USR-1001"
           />
         </label>
+
+        <label>
+          Related Incident ID
+          <input
+            name="relatedIncidentId"
+            type="text"
+            value={form.relatedIncidentId}
+            onChange={handleChange}
+            placeholder="INCIDENT-2001"
+          />
+        </label>
+
+        <label>
+          Related Resolution ID
+          <input
+            name="relatedResolutionId"
+            type="text"
+            value={form.relatedResolutionId}
+            onChange={handleChange}
+            placeholder="RES-4001"
+          />
+        </label>
+      </div>
+
+      <div className="ticket-detail-stack">
+        <div>
+          <strong>Available link targets</strong>
+          <p>Releases: {releases.map((release) => release.id).join(', ') || '—'}</p>
+          <p>Errors: {errors.map((record) => record.id).join(', ') || '—'}</p>
+          <p>Incidents: {incidents.map((incident) => incident.id).join(', ') || '—'}</p>
+          <p>Resolutions: {resolutions.map((resolution) => resolution.id).join(', ') || '—'}</p>
+          <p>Knowledge: {knowledgeArticles.map((article) => article.id).join(', ') || '—'}</p>
+        </div>
       </div>
 
       <label>
@@ -412,6 +410,28 @@ export function TicketCreateForm() {
           value={form.workaround}
           onChange={handleChange}
           placeholder="Known workaround, if any"
+        />
+      </label>
+
+      <label>
+        Related Error IDs
+        <input
+          name="relatedErrorIdsText"
+          type="text"
+          value={form.relatedErrorIdsText}
+          onChange={handleChange}
+          placeholder="ERR-5001, ERR-5002"
+        />
+      </label>
+
+      <label>
+        Related Knowledge Article IDs
+        <input
+          name="relatedKnowledgeArticleIdsText"
+          type="text"
+          value={form.relatedKnowledgeArticleIdsText}
+          onChange={handleChange}
+          placeholder="KB-6001, KB-6002"
         />
       </label>
 
