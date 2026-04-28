@@ -1,3 +1,4 @@
+import { addActivity } from '@/features/activity/lib/activityStore';
 import { readLocalStore, writeLocalStore } from '@/lib/localStorageStore';
 import type { SettingsRecord } from '@/types/settings';
 
@@ -40,6 +41,10 @@ function writeStoredSettings(record: SettingsRecord) {
   writeLocalStore(STORAGE_KEY, record);
 }
 
+function nowIsoLike() {
+  return new Date().toISOString().slice(0, 16).replace('T', ' ');
+}
+
 export function getSettings() {
   return readStoredSettings();
 }
@@ -53,9 +58,24 @@ export function updateSettings(updates: Partial<SettingsRecord>) {
       ...existing.localPreferences,
       ...(updates.localPreferences || {}),
     },
-    updatedAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
+    updatedAt: nowIsoLike(),
   };
   writeStoredSettings(next);
+
+  addActivity({
+    entityType: 'settings',
+    entityId: 'workflow-config',
+    action: 'updated',
+    actor: 'System',
+    summary: 'Workflow settings were updated.',
+    timestamp: next.updatedAt,
+    metadata: {
+      defaultAssignee: next.defaultAssignee,
+      technicianCount: next.technicians.length,
+      categoryCount: next.categories.length,
+    },
+  });
+
   return next;
 }
 
@@ -69,4 +89,17 @@ export function clearData() {
 
 export function resetSettings() {
   writeStoredSettings(defaultSettings);
+  addActivity({
+    entityType: 'settings',
+    entityId: 'workflow-config',
+    action: 'reset',
+    actor: 'System',
+    summary: 'Workflow settings were reset to defaults.',
+    timestamp: nowIsoLike(),
+    metadata: {
+      defaultAssignee: defaultSettings.defaultAssignee,
+      technicianCount: defaultSettings.technicians.length,
+      categoryCount: defaultSettings.categories.length,
+    },
+  });
 }
