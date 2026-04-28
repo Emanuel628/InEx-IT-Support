@@ -24,8 +24,24 @@ function writeStoredActivity(records: ActivityRecord[]) {
   writeLocalStore(STORAGE_KEY, records);
 }
 
+function nextActivityId(existing: ActivityRecord[]) {
+  const highest = existing.reduce((max, record) => Math.max(max, Number(record.id.replace(/[^0-9]/g, '')) || 7000), 7000);
+  return `ACT-${highest + 1}`;
+}
+
 export function getActivity() {
   return readStoredActivity().sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}
+
+export function addActivity(input: Omit<ActivityRecord, 'id'>) {
+  const existing = readStoredActivity();
+  const record: ActivityRecord = {
+    id: nextActivityId(existing),
+    ...input,
+  };
+  const next = [record, ...existing];
+  writeStoredActivity(next);
+  return record;
 }
 
 export function seedDemoData() {
