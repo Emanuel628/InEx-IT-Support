@@ -1,0 +1,48 @@
+import type { ResolutionRecord } from '@/types/resolutions';
+
+export const mockResolutions: ResolutionRecord[] = [
+  {
+    id: 'RES-4001',
+    title: 'Fixed receipt business context lookup',
+    problemSummary: 'Receipts page failed because business context was not resolved correctly for the current user.',
+    rootCause: 'Receipts flow relied on a missing or stale business identifier instead of a resolver path.',
+    fixApplied: 'Updated the receipts path to resolve business context from the authenticated user before loading records.',
+    filesOrAreasTouched: ['receipts route', 'business resolver'],
+    commandsUsed: ['deploy production fix', 'verify receipts endpoint'],
+    verificationSteps: [
+      'Open receipts page as the affected business owner.',
+      'Confirm uploads proceed without missing context errors.',
+    ],
+    rollbackNotes: 'Rollback to prior receipts routing only if the new resolver introduces broader account-context issues.',
+    relatedTicketIds: ['INC-1041'],
+    relatedErrorIds: [],
+    relatedIncidentId: 'INCIDENT-2002',
+    relatedReleaseId: 'REL-3001',
+    relatedKnowledgeArticleIds: ['KB-6002'],
+    createdAt: '2026-04-09 12:15',
+    updatedAt: '2026-04-09 12:40',
+    tags: ['receipts', 'business-context'],
+  },
+  {
+    id: 'RES-4002',
+    title: 'Fixed SQL BOM migration failure',
+    problemSummary: 'Migration execution failed because the SQL file contained a BOM character.',
+    rootCause: 'Migration parser encountered a BOM at the start of the file and PostgreSQL rejected the script.',
+    fixApplied: 'Removed the BOM and re-ran the forward migration path safely.',
+    filesOrAreasTouched: ['migration file', 'deployment process'],
+    commandsUsed: ['strip bom', 're-run migration'],
+    verificationSteps: [
+      'Run migration on production-shaped data.',
+      'Confirm schema completes without syntax error.',
+    ],
+    rollbackNotes: 'Do not rewrite migration history; apply forward fixes only.',
+    relatedTicketIds: ['INC-1032'],
+    relatedErrorIds: ['ERR-5003'],
+    relatedIncidentId: '',
+    relatedReleaseId: 'REL-3000',
+    relatedKnowledgeArticleIds: [],
+    createdAt: '2026-04-08 19:05',
+    updatedAt: '2026-04-08 19:20',
+    tags: ['migration', 'bom', 'database'],
+  },
+];
