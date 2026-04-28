@@ -1,3 +1,4 @@
+import { addActivity } from '@/features/activity/lib/activityStore';
 import { mockIncidents } from '@/features/incidents/data/mockIncidents';
 import { readLocalStore, writeLocalStore } from '@/lib/localStorageStore';
 import type { CreateIncidentInput, IncidentRecord } from '@/types/incidents';
@@ -29,6 +30,10 @@ function nextIncidentId(existing: IncidentRecord[]) {
   return `INCIDENT-${highest + 1}`;
 }
 
+function nowIsoLike() {
+  return new Date().toISOString().slice(0, 16).replace('T', ' ');
+}
+
 export function getIncidents() {
   return readStoredIncidents().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
@@ -39,17 +44,95 @@ export function getIncidentById(incidentId: string) {
 
 export function createIncident(input: CreateIncidentInput) {
   const existing = readStoredIncidents();
-  const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
-  const record: IncidentRecord = { id: nextIncidentId(existing), createdAt: timestamp, updatedAt: timestamp, timeline: [], ...input };
+  const timestamp = nowIsoLike();
+  const record: IncidentRecord = {
+    id: nextIncidentId(existing),
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    timeline: [
+      {
+        id: `timeline-${timestamp}`,
+        timestamp,
+        actor: 'System',
+        summary: `Incident created with status ${input.status.replace(/_/g, ' ')}.`,
+      },
+    ],
+    ...input,
+  };
   const next = [record, ...existing];
   writeStoredIncidents(next);
+
+  addActivity({
+    entityType: 'incident',
+    entityId: record.id,
+    action: 'created',
+    actor: 'System',
+    summary: `Incident ${record.id} was created for ${record.environment}.`,
+    timestamp,
+    metadata: {
+      status: record.status,
+      severity: record.severity,
+      environment: record.environment,
+    },
+  });
+
   return record;
 }
 
 export function updateIncident(incidentId: string, updates: Partial<IncidentRecord>) {
-  const next = readStoredIncidents().map((record) => record.id === incidentId ? { ...record, ...updates, updatedAt: new Date().toISOString().slice(0, 16).replace('T', ' ') } : record);
+  const previous = getIncidentById(incidentId);
+  const timestamp = nowIsoLike();
+  const next = readStoredIncidents().map((record) => {
+    if (record.id !== incidentId) {
+      return record;
+    }
+
+    const timeline = updates.timeline ?? (
+      previous && previous.status !== (updates.status ?? previous.status)
+        ? [
+            {
+              id: `${record.id}-timeline-${Date.now()}`,
+              timestamp,
+              actor: 'System',
+              summary: `Incident status changed from ${previous.status.replace(/_/g, ' ')} to ${(updates.status ?? previous.status).replace(/_/g, ' ')}.`,
+            },
+            ...record.timeline,
+          ]
+        : record.timeline
+    );
+
+    return {
+      ...record,
+      ...updates,
+      timeline,
+      updatedAt: timestamp,
+    };
+  });
   writeStoredIncidents(next);
-  return next.find((record) => record.id === incidentId) || null;
+  const updated = next.find((record) => record.id === incidentId) || null;
+
+  if (updated) {
+    const action = previous && previous.status !== updated.status ? 'status_changed' : 'updated';
+    const summary = previous && previous.status !== updated.status
+      ? `Incident ${updated.id} status changed to ${updated.status.replace(/_/g, ' ')}.`
+      : `Incident ${updated.id} was updated.`;
+
+    addActivity({
+      entityType: 'incident',
+      entityId: updated.id,
+      action,
+      actor: 'System',
+      summary,
+      timestamp,
+      metadata: {
+        status: updated.status,
+        severity: updated.severity,
+        environment: updated.environment,
+      },
+    });
+  }
+
+  return updated;
 }
 
 export function seedDemoData() {
