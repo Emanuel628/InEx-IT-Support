@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getActivityByEntity } from '@/features/activity/lib/activityStore';
 import { getBusinessById, updateBusiness } from '@/features/businesses/lib/businessStore';
 import { getErrors } from '@/features/errors/lib/errorStore';
 import { getIncidents } from '@/features/incidents/lib/incidentStore';
@@ -15,6 +16,7 @@ export function BusinessDetailPage() {
   const tickets = useMemo(() => getTickets(), [version]);
   const errors = useMemo(() => getErrors(), [version]);
   const incidents = useMemo(() => getIncidents(), [version]);
+  const businessActivity = useMemo(() => getActivityByEntity('business', businessId).slice(0, 8), [businessId, version]);
 
   function refresh() {
     setVersion((current) => current + 1);
@@ -159,6 +161,24 @@ export function BusinessDetailPage() {
             Tags
             <input defaultValue={business.tags.join(', ')} onBlur={(event) => updateAndRefresh({ tags: event.target.value.split(',').map((value) => value.trim()).filter(Boolean) })} />
           </label>
+        </div>
+      </section>
+
+      <section className="ticket-detail-panel">
+        <div className="ticket-section-header">
+          <h3>Recent Business Activity</h3>
+          <span>Latest audit-style actions recorded for this business support record.</span>
+        </div>
+        <div className="ticket-detail-stack">
+          {businessActivity.length ? businessActivity.map((item) => (
+            <article key={item.id} className="ticket-activity-item">
+              <div className="ticket-activity-meta">
+                <strong>{item.summary}</strong>
+                <span>{item.timestamp}</span>
+              </div>
+              <p>{item.actor}</p>
+            </article>
+          )) : <p>No business activity yet.</p>}
         </div>
       </section>
     </section>
