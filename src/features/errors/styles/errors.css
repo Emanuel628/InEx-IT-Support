@@ -206,6 +206,11 @@
   flex-wrap: wrap;
 }
 
+.error-link-actions-group {
+  display: grid;
+  gap: 10px;
+}
+
 .error-detail-stack,
 .error-link-list,
 .error-empty-state {
