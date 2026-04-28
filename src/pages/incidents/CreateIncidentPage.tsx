@@ -7,7 +7,7 @@ import { getResolutions } from '@/features/resolutions/lib/resolutionStore';
 import { getTickets } from '@/features/tickets/lib/ticketStore';
 import { INCIDENT_SEVERITIES, INCIDENT_STATUSES } from '@/constants/workflow';
 import type { CreateIncidentInput, IncidentEnvironment, IncidentSeverity, IncidentStatus } from '@/types/incidents';
-import '@/features/tickets/styles/tickets.css';
+import '@/features/incidents/styles/incidents.css';
 
 const initialForm: CreateIncidentInput = {
   title: '',
@@ -59,23 +59,23 @@ export function CreateIncidentPage() {
   }
 
   return (
-    <section className="ticket-workspace-page">
-      <div className="ticket-page-header">
+    <section className="incident-workspace-page">
+      <div className="incident-page-header">
         <div>
-          <span className="ticket-page-eyebrow">Log Incident</span>
+          <span className="incident-page-eyebrow">Log Incident</span>
           <h2>New Incident</h2>
           <p>Capture a larger support event affecting multiple users or a major system area.</p>
         </div>
       </div>
 
-      <section className="ticket-detail-panel">
-        <div className="ticket-section-header">
+      <section className="incident-panel">
+        <div className="incident-section-header">
           <h3>Incident Intake Form</h3>
           <span>Track customer impact, affected areas, linked records, and the investigation path.</span>
         </div>
 
-        <form className="ticket-form-layout" onSubmit={handleSubmit}>
-          <div className="ticket-form-grid">
+        <form className="incident-form-layout" onSubmit={handleSubmit}>
+          <div className="incident-form-grid">
             <label>
               Title
               <input value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required />
@@ -127,7 +127,7 @@ export function CreateIncidentPage() {
             </label>
           </div>
 
-          <div className="ticket-detail-stack">
+          <div className="incident-detail-stack">
             <div>
               <strong>Quick link helpers</strong>
               <p>Tickets: {tickets.map((ticket) => ticket.id).join(', ') || '—'}</p>
@@ -135,14 +135,14 @@ export function CreateIncidentPage() {
               <p>Releases: {releases.map((release) => release.id).join(', ') || '—'}</p>
               <p>Resolutions: {resolutions.map((resolution) => resolution.id).join(', ') || '—'}</p>
             </div>
-            <div className="ticket-inline-actions">
+            <div className="incident-inline-actions">
               {tickets.map((ticket) => (
                 <button key={ticket.id} type="button" onClick={() => toggleId('relatedTicketIds', ticket.id)}>
                   {form.relatedTicketIds.includes(ticket.id) ? `Unlink ${ticket.id}` : `Link ${ticket.id}`}
                 </button>
               ))}
             </div>
-            <div className="ticket-inline-actions">
+            <div className="incident-inline-actions">
               {errors.map((error) => (
                 <button key={error.id} type="button" onClick={() => toggleId('relatedErrorIds', error.id)}>
                   {form.relatedErrorIds.includes(error.id) ? `Unlink ${error.id}` : `Link ${error.id}`}
@@ -168,7 +168,7 @@ export function CreateIncidentPage() {
             <textarea rows={4} value={form.resolutionSummary} onChange={(event) => setForm((current) => ({ ...current, resolutionSummary: event.target.value }))} />
           </label>
 
-          <div className="ticket-form-actions">
+          <div className="incident-form-actions">
             <button type="submit">Save Incident</button>
           </div>
         </form>
