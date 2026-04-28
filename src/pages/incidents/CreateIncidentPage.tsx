@@ -58,6 +58,13 @@ export function CreateIncidentPage() {
     }));
   }
 
+  function toggleSingleLink(key: 'relatedReleaseId' | 'relatedResolutionId', value: string) {
+    setForm((current) => ({
+      ...current,
+      [key]: current[key] === value ? '' : value,
+    }));
+  }
+
   return (
     <section className="incident-workspace-page">
       <div className="incident-page-header">
@@ -146,6 +153,20 @@ export function CreateIncidentPage() {
               {errors.map((error) => (
                 <button key={error.id} type="button" onClick={() => toggleId('relatedErrorIds', error.id)}>
                   {form.relatedErrorIds.includes(error.id) ? `Unlink ${error.id}` : `Link ${error.id}`}
+                </button>
+              ))}
+            </div>
+            <div className="incident-inline-actions">
+              {releases.map((release) => (
+                <button key={release.id} type="button" onClick={() => toggleSingleLink('relatedReleaseId', release.id)}>
+                  {form.relatedReleaseId === release.id ? `Unlink ${release.id}` : `Link ${release.id}`}
+                </button>
+              ))}
+            </div>
+            <div className="incident-inline-actions">
+              {resolutions.map((resolution) => (
+                <button key={resolution.id} type="button" onClick={() => toggleSingleLink('relatedResolutionId', resolution.id)}>
+                  {form.relatedResolutionId === resolution.id ? `Unlink ${resolution.id}` : `Link ${resolution.id}`}
                 </button>
               ))}
             </div>
