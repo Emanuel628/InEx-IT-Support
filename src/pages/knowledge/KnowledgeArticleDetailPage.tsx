@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { getActivityByEntity } from '@/features/activity/lib/activityStore';
 import { getResolutions } from '@/features/resolutions/lib/resolutionStore';
 import { getTickets } from '@/features/tickets/lib/ticketStore';
 import { getKnowledgeArticleById, updateKnowledgeArticle } from '@/features/knowledge/lib/knowledgeStore';
@@ -11,6 +12,7 @@ export function KnowledgeArticleDetailPage() {
   const article = useMemo(() => getKnowledgeArticleById(articleId), [articleId, version]);
   const tickets = useMemo(() => getTickets(), [version]);
   const resolutions = useMemo(() => getResolutions(), [version]);
+  const articleActivity = useMemo(() => getActivityByEntity('knowledge_article', articleId).slice(0, 8), [articleId, version]);
 
   function refresh() {
     setVersion((current) => current + 1);
@@ -139,6 +141,24 @@ export function KnowledgeArticleDetailPage() {
             <strong>Resolutions</strong>
             <p>{linkedResolutions.length ? linkedResolutions.map((record) => `${record.id} — ${record.title}`).join(' | ') : '—'}</p>
           </div>
+        </div>
+      </section>
+
+      <section className="ticket-detail-panel">
+        <div className="ticket-section-header">
+          <h3>Recent Knowledge Activity</h3>
+          <span>Latest audit-style actions recorded for this knowledge article.</span>
+        </div>
+        <div className="ticket-detail-stack">
+          {articleActivity.length ? articleActivity.map((item) => (
+            <article key={item.id} className="ticket-activity-item">
+              <div className="ticket-activity-meta">
+                <strong>{item.summary}</strong>
+                <span>{item.timestamp}</span>
+              </div>
+              <p>{item.actor}</p>
+            </article>
+          )) : <p>No knowledge activity yet.</p>}
         </div>
       </section>
     </section>
