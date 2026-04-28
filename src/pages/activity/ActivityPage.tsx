@@ -1,6 +1,36 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getActivity } from '@/features/activity/lib/activityStore';
 import '@/features/activity/styles/activity.css';
+
+function getEntityHref(entityType: string, entityId: string) {
+  switch (entityType) {
+    case 'ticket':
+      return `/tickets/${entityId}`;
+    case 'error':
+      return `/errors/${entityId}`;
+    case 'incident':
+      return `/incidents/${entityId}`;
+    case 'user':
+      return `/users/${entityId}`;
+    case 'business':
+      return `/businesses/${entityId}`;
+    case 'knowledge_article':
+      return `/knowledge/${entityId}`;
+    case 'resolution':
+      return `/resolutions/${entityId}`;
+    case 'release':
+      return `/releases/${entityId}`;
+    case 'data':
+      return '/data';
+    case 'backup':
+      return '/backups';
+    case 'settings':
+      return '/settings';
+    default:
+      return null;
+  }
+}
 
 export function ActivityPage() {
   const records = getActivity();
@@ -81,22 +111,25 @@ export function ActivityPage() {
 
       {filtered.length ? (
         <section className="activity-list">
-          {filtered.map((record) => (
-            <article key={record.id} className="activity-item">
-              <div className="activity-item-header">
-                <strong>{record.entityId}</strong>
-                <span className="activity-item-meta">{record.timestamp}</span>
-              </div>
-              <p className="activity-item-summary">{record.summary}</p>
-              <span className="activity-item-meta">{record.actor} · {record.action}</span>
-              <div className="activity-item-tags">
-                <span className="activity-tag">{record.entityType}</span>
-                {Object.entries(record.metadata).slice(0, 3).map(([key, value]) => (
-                  <span key={key} className="activity-tag">{key}: {String(value)}</span>
-                ))}
-              </div>
-            </article>
-          ))}
+          {filtered.map((record) => {
+            const href = getEntityHref(record.entityType, record.entityId);
+            return (
+              <article key={record.id} className="activity-item">
+                <div className="activity-item-header">
+                  {href ? <Link to={href}><strong>{record.entityId}</strong></Link> : <strong>{record.entityId}</strong>}
+                  <span className="activity-item-meta">{record.timestamp}</span>
+                </div>
+                <p className="activity-item-summary">{record.summary}</p>
+                <span className="activity-item-meta">{record.actor} · {record.action}</span>
+                <div className="activity-item-tags">
+                  <span className="activity-tag">{record.entityType}</span>
+                  {Object.entries(record.metadata).slice(0, 3).map(([key, value]) => (
+                    <span key={key} className="activity-tag">{key}: {String(value)}</span>
+                  ))}
+                </div>
+              </article>
+            );
+          })}
         </section>
       ) : (
         <section className="activity-empty-state">
