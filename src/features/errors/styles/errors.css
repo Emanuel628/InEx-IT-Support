@@ -1,0 +1,234 @@
+.error-workspace-page {
+  display: grid;
+  gap: 20px;
+}
+
+.error-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.error-page-header h2 {
+  margin: 4px 0 8px;
+  font-size: 1.75rem;
+}
+
+.error-page-header p {
+  margin: 0;
+  color: #94a3b8;
+}
+
+.error-page-eyebrow {
+  display: inline-block;
+  color: #fca5a5;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.error-primary-action {
+  border: 1px solid rgba(248, 113, 113, 0.26);
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.18);
+  color: #fff;
+  text-decoration: none;
+}
+
+.error-stats-grid,
+.error-detail-grid,
+.error-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.error-stat-card,
+.error-panel,
+.error-detail-card {
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 18px;
+  background: rgba(30, 41, 59, 0.55);
+  padding: 16px;
+}
+
+.error-stat-card span,
+.error-section-header span,
+.error-detail-label,
+.error-empty-state span {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+}
+
+.error-stat-card strong {
+  font-size: 1.8rem;
+}
+
+.error-filters-bar,
+.error-form-layout {
+  display: grid;
+  gap: 12px;
+}
+
+.error-filters-bar {
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+}
+
+.error-filter-group label,
+.error-form-layout label,
+.error-form-grid label {
+  display: grid;
+  gap: 8px;
+  color: #cbd5e1;
+}
+
+.error-filter-group input,
+.error-filter-group select,
+.error-form-layout input,
+.error-form-layout select,
+.error-form-layout textarea,
+.error-form-grid input,
+.error-form-grid select,
+.error-form-grid textarea {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #e2e8f0;
+  padding: 10px 12px;
+}
+
+.error-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.error-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1100px;
+}
+
+.error-table th,
+.error-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.error-table th {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.error-title-cell {
+  display: grid;
+  gap: 4px;
+}
+
+.error-title-cell span,
+.error-link-list span,
+.error-link-list small {
+  color: #94a3b8;
+}
+
+.error-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  border: 1px solid transparent;
+}
+
+.error-badge.is-critical {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(248, 113, 113, 0.28);
+}
+
+.error-badge.is-major {
+  background: rgba(251, 146, 60, 0.16);
+  border-color: rgba(251, 191, 36, 0.28);
+}
+
+.error-badge.is-minor,
+.error-badge.is-status {
+  background: rgba(148, 163, 184, 0.14);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+.error-section-header {
+  margin-bottom: 16px;
+}
+
+.error-section-header h3 {
+  margin: 0 0 4px;
+}
+
+.error-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.error-form-actions button,
+.error-inline-actions button {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.18);
+  color: #fff;
+  cursor: pointer;
+}
+
+.error-inline-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.error-detail-stack,
+.error-link-list,
+.error-empty-state {
+  display: grid;
+  gap: 10px;
+}
+
+.error-detail-stack p,
+.error-empty-state p,
+.error-link-list p,
+.error-detail-card p {
+  margin: 0;
+}
+
+.error-empty-state {
+  border: 1px dashed rgba(148, 163, 184, 0.2);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+@media (max-width: 1080px) {
+  .error-filters-bar {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .error-page-header {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .error-filters-bar {
+    grid-template-columns: 1fr;
+  }
+}
