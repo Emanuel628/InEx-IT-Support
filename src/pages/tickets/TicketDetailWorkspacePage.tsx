@@ -2,6 +2,7 @@ import { useMemo, useState, type ChangeEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { TicketDetailSummary } from '@/features/tickets/components/TicketDetailSummary';
 import { TicketActivityTimeline } from '@/features/tickets/components/TicketActivityTimeline';
+import { getSettings } from '@/features/settings/lib/settingsStore';
 import {
   getTicketById,
   updateTicketAssignment,
@@ -11,27 +12,16 @@ import {
 import type { TicketPriority, TicketStatus } from '@/types/tickets';
 import '@/features/tickets/styles/tickets.css';
 
-const statusOptions: { value: TicketStatus; label: string }[] = [
-  { value: 'new', label: 'New' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'waiting_on_user', label: 'Waiting on User' },
-  { value: 'escalated', label: 'Escalated' },
-  { value: 'resolved', label: 'Resolved' },
-  { value: 'archived', label: 'Archived' },
-];
-
-const priorityOptions: { value: TicketPriority; label: string }[] = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'critical', label: 'Critical' },
-];
+function labelize(value: string) {
+  return value.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
 export function TicketDetailWorkspacePage() {
   const { ticketId = '' } = useParams();
   const [version, setVersion] = useState(0);
 
   const ticket = useMemo(() => getTicketById(ticketId), [ticketId, version]);
+  const settings = useMemo(() => getSettings(), [version]);
 
   if (!ticket) {
     return (
@@ -65,7 +55,7 @@ export function TicketDetailWorkspacePage() {
     refreshTicket();
   }
 
-  function handleAssignedTechBlur(event: ChangeEvent<HTMLInputElement>) {
+  function handleAssignedTechChange(event: ChangeEvent<HTMLSelectElement>) {
     const nextAssignedTech = event.target.value.trim();
     if (nextAssignedTech === ticket.assignedTech) return;
     updateTicketAssignment(ticket.id, nextAssignedTech);
@@ -96,9 +86,9 @@ export function TicketDetailWorkspacePage() {
           <label>
             Status
             <select value={ticket.status} onChange={handleStatusChange}>
-              {statusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {settings.statuses.map((value) => (
+                <option key={value} value={value}>
+                  {labelize(value)}
                 </option>
               ))}
             </select>
@@ -107,9 +97,9 @@ export function TicketDetailWorkspacePage() {
           <label>
             Priority
             <select value={ticket.priority} onChange={handlePriorityChange}>
-              {priorityOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
+              {settings.priorities.map((value) => (
+                <option key={value} value={value}>
+                  {labelize(value)}
                 </option>
               ))}
             </select>
@@ -117,11 +107,11 @@ export function TicketDetailWorkspacePage() {
 
           <label>
             Assigned Tech
-            <input
-              type="text"
-              defaultValue={ticket.assignedTech}
-              onBlur={handleAssignedTechBlur}
-            />
+            <select value={ticket.assignedTech} onChange={handleAssignedTechChange}>
+              {['Unassigned', ...settings.technicians].map((value) => (
+                <option key={value} value={value}>{value}</option>
+              ))}
+            </select>
           </label>
 
           <label>
