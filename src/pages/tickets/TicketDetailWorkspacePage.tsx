@@ -17,6 +17,7 @@ const statusOptions: { value: TicketStatus; label: string }[] = [
   { value: 'waiting_on_user', label: 'Waiting on User' },
   { value: 'escalated', label: 'Escalated' },
   { value: 'resolved', label: 'Resolved' },
+  { value: 'archived', label: 'Archived' },
 ];
 
 const priorityOptions: { value: TicketPriority; label: string }[] = [
@@ -160,6 +161,22 @@ export function TicketDetailWorkspacePage() {
           <div>
             <strong>Release</strong>
             <p>{ticket.relatedRelease || '—'}</p>
+          </div>
+          <div>
+            <strong>Linked Errors</strong>
+            <p>{ticket.relatedErrorIds.length ? ticket.relatedErrorIds.join(', ') : '—'}</p>
+          </div>
+          <div>
+            <strong>Linked Incident</strong>
+            <p>{ticket.relatedIncidentId || '—'}</p>
+          </div>
+          <div>
+            <strong>Linked Resolution</strong>
+            <p>{ticket.relatedResolutionId || '—'}</p>
+          </div>
+          <div>
+            <strong>Knowledge Articles</strong>
+            <p>{ticket.relatedKnowledgeArticleIds.length ? ticket.relatedKnowledgeArticleIds.join(', ') : '—'}</p>
           </div>
           <div>
             <strong>Tags</strong>
