@@ -1,6 +1,6 @@
 import { addActivity } from '@/features/activity/lib/activityStore';
 import { getActivity, seedDemoData as seedActivityData } from '@/features/activity/lib/activityStore';
-import { clearData as clearBackupData, getBackups, seedDemoData as seedBackupData } from '@/features/backups/lib/backupStore';
+import { getBackups, seedDemoData as seedBackupData } from '@/features/backups/lib/backupStore';
 import { getBusinesses, seedDemoData as seedBusinessData } from '@/features/businesses/lib/businessStore';
 import { getErrors, seedDemoData as seedErrorData } from '@/features/errors/lib/errorStore';
 import { getIncidents, seedDemoData as seedIncidentData } from '@/features/incidents/lib/incidentStore';
@@ -10,7 +10,7 @@ import { getResolutions, seedDemoData as seedResolutionData } from '@/features/r
 import { getSettings, resetSettings } from '@/features/settings/lib/settingsStore';
 import { getTickets, seedDemoData as seedTicketData } from '@/features/tickets/lib/ticketStore';
 import { getUsers, seedDemoData as seedUserData } from '@/features/users/lib/userStore';
-import { clearLocalStore, writeLocalStore } from '@/lib/localStorageStore';
+import { writeLocalStore } from '@/lib/localStorageStore';
 
 export const SUPPORT_SCHEMA_VERSION = '1';
 
@@ -188,18 +188,38 @@ export function resetSupportDataToDemo() {
 }
 
 export function clearSupportData() {
-  clearLocalStore(SUPPORT_DATA_KEYS.tickets);
-  clearLocalStore(SUPPORT_DATA_KEYS.errors);
-  clearLocalStore(SUPPORT_DATA_KEYS.incidents);
-  clearLocalStore(SUPPORT_DATA_KEYS.users);
-  clearLocalStore(SUPPORT_DATA_KEYS.businesses);
-  clearLocalStore(SUPPORT_DATA_KEYS.knowledgeArticles);
-  clearLocalStore(SUPPORT_DATA_KEYS.resolutions);
-  clearLocalStore(SUPPORT_DATA_KEYS.releases);
-  clearLocalStore(SUPPORT_DATA_KEYS.activity);
-  clearBackupData();
-  clearLocalStore(SUPPORT_DATA_KEYS.settings);
-  if (canUseStorage()) {
-    window.localStorage.setItem(SUPPORT_DATA_KEYS.schemaVersion, SUPPORT_SCHEMA_VERSION);
+  if (!canUseStorage()) {
+    return;
   }
+  window.localStorage.setItem(SUPPORT_DATA_KEYS.schemaVersion, SUPPORT_SCHEMA_VERSION);
+  writeLocalStore(SUPPORT_DATA_KEYS.tickets, []);
+  writeLocalStore(SUPPORT_DATA_KEYS.errors, []);
+  writeLocalStore(SUPPORT_DATA_KEYS.incidents, []);
+  writeLocalStore(SUPPORT_DATA_KEYS.users, []);
+  writeLocalStore(SUPPORT_DATA_KEYS.businesses, []);
+  writeLocalStore(SUPPORT_DATA_KEYS.knowledgeArticles, []);
+  writeLocalStore(SUPPORT_DATA_KEYS.resolutions, []);
+  writeLocalStore(SUPPORT_DATA_KEYS.releases, []);
+  writeLocalStore(SUPPORT_DATA_KEYS.activity, []);
+  writeLocalStore(SUPPORT_DATA_KEYS.backups, []);
+  resetSettings();
+  addActivity({
+    entityType: 'data',
+    entityId: 'clear-local',
+    action: 'cleared',
+    actor: 'System',
+    summary: 'Local support data was cleared.',
+    timestamp: nowIsoLike(),
+    metadata: {
+      tickets: 0,
+      errors: 0,
+      incidents: 0,
+      users: 0,
+      businesses: 0,
+      knowledgeArticles: 0,
+      resolutions: 0,
+      releases: 0,
+      backups: 0,
+    },
+  });
 }
