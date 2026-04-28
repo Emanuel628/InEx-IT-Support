@@ -8,7 +8,7 @@ import { getTickets } from '@/features/tickets/lib/ticketStore';
 import { INCIDENT_SEVERITIES, INCIDENT_STATUSES } from '@/constants/workflow';
 import { getIncidentById, updateIncident } from '@/features/incidents/lib/incidentStore';
 import type { IncidentEnvironment, IncidentSeverity, IncidentStatus, IncidentTimelineItem } from '@/types/incidents';
-import '@/features/tickets/styles/tickets.css';
+import '@/features/incidents/styles/incidents.css';
 
 function nowIsoLike() {
   return new Date().toISOString().slice(0, 16).replace('T', ' ');
@@ -32,10 +32,10 @@ export function IncidentDetailPage() {
 
   if (!incident) {
     return (
-      <section className="ticket-workspace-page">
-        <div className="ticket-page-header">
+      <section className="incident-workspace-page">
+        <div className="incident-page-header">
           <div>
-            <span className="ticket-page-eyebrow">Incident Detail</span>
+            <span className="incident-page-eyebrow">Incident Detail</span>
             <h2>Incident Not Found</h2>
             <p>The requested incident does not exist in local storage yet.</p>
           </div>
@@ -78,28 +78,28 @@ export function IncidentDetailPage() {
   }
 
   return (
-    <section className="ticket-workspace-page">
-      <div className="ticket-page-header">
+    <section className="incident-workspace-page">
+      <div className="incident-page-header">
         <div>
-          <span className="ticket-page-eyebrow">Incident Detail</span>
+          <span className="incident-page-eyebrow">Incident Detail</span>
           <h2>{incident.title}</h2>
           <p>{incident.id} · {incident.environment} · {incident.status.replace(/_/g, ' ')}</p>
         </div>
       </div>
 
-      <div className="ticket-stats-grid">
-        <article className="ticket-stat-card"><span>Status</span><strong>{incident.status.replace(/_/g, ' ')}</strong></article>
-        <article className="ticket-stat-card"><span>Severity</span><strong>{incident.severity}</strong></article>
-        <article className="ticket-stat-card"><span>Started</span><strong>{incident.startedAt}</strong></article>
-        <article className="ticket-stat-card"><span>Resolved</span><strong>{incident.resolvedAt || '—'}</strong></article>
+      <div className="incident-stats-grid">
+        <article className="incident-stat-card"><span>Status</span><strong>{incident.status.replace(/_/g, ' ')}</strong></article>
+        <article className="incident-stat-card"><span>Severity</span><strong>{incident.severity}</strong></article>
+        <article className="incident-stat-card"><span>Started</span><strong>{incident.startedAt}</strong></article>
+        <article className="incident-stat-card"><span>Resolved</span><strong>{incident.resolvedAt || '—'}</strong></article>
       </div>
 
-      <section className="ticket-detail-panel">
-        <div className="ticket-section-header">
+      <section className="incident-panel">
+        <div className="incident-section-header">
           <h3>Incident Controls</h3>
           <span>Update status, impact, environment, and linked support records.</span>
         </div>
-        <div className="ticket-form-grid">
+        <div className="incident-form-grid">
           <label>
             Status
             <select value={incident.status} onChange={(event) => updateAndRefresh({ status: event.target.value as IncidentStatus })}>
@@ -142,7 +142,7 @@ export function IncidentDetailPage() {
             <input defaultValue={incident.relatedResolutionId} onBlur={(event) => updateAndRefresh({ relatedResolutionId: event.target.value.trim() })} />
           </label>
         </div>
-        <div className="ticket-inline-actions">
+        <div className="incident-inline-actions">
           <button type="button" onClick={() => updateAndRefresh({ status: 'investigating' })}>Investigating</button>
           <button type="button" onClick={() => updateAndRefresh({ status: 'identified' })}>Identified</button>
           <button type="button" onClick={() => updateAndRefresh({ status: 'monitoring' })}>Monitoring</button>
@@ -151,12 +151,12 @@ export function IncidentDetailPage() {
         </div>
       </section>
 
-      <section className="ticket-detail-panel">
-        <div className="ticket-section-header">
+      <section className="incident-panel">
+        <div className="incident-section-header">
           <h3>Impact + Investigation</h3>
           <span>Record customer impact, workaround, root cause, and resolution notes.</span>
         </div>
-        <div className="ticket-detail-stack">
+        <div className="incident-detail-stack">
           <label>
             Customer Impact
             <textarea rows={4} defaultValue={incident.customerImpact} onBlur={(event) => updateAndRefresh({ customerImpact: event.target.value.trim() })} />
@@ -176,12 +176,12 @@ export function IncidentDetailPage() {
         </div>
       </section>
 
-      <section className="ticket-detail-panel">
-        <div className="ticket-section-header">
+      <section className="incident-panel">
+        <div className="incident-section-header">
           <h3>Linked Records</h3>
           <span>Connect the incident to tickets, errors, releases, and resolutions.</span>
         </div>
-        <div className="ticket-detail-stack">
+        <div className="incident-detail-stack">
           <div>
             <strong>Quick link helpers</strong>
             <p>Tickets: {tickets.map((ticket) => ticket.id).join(', ') || '—'}</p>
@@ -189,14 +189,14 @@ export function IncidentDetailPage() {
             <p>Releases: {releases.map((release) => release.id).join(', ') || '—'}</p>
             <p>Resolutions: {resolutions.map((resolution) => resolution.id).join(', ') || '—'}</p>
           </div>
-          <div className="ticket-inline-actions">
+          <div className="incident-inline-actions">
             {tickets.map((ticket) => (
               <button key={ticket.id} type="button" onClick={() => toggleId('relatedTicketIds', ticket.id)}>
                 {incident.relatedTicketIds.includes(ticket.id) ? `Unlink ${ticket.id}` : `Link ${ticket.id}`}
               </button>
             ))}
           </div>
-          <div className="ticket-inline-actions">
+          <div className="incident-inline-actions">
             {errors.map((error) => (
               <button key={error.id} type="button" onClick={() => toggleId('relatedErrorIds', error.id)}>
                 {incident.relatedErrorIds.includes(error.id) ? `Unlink ${error.id}` : `Link ${error.id}`}
@@ -213,13 +213,13 @@ export function IncidentDetailPage() {
         </div>
       </section>
 
-      <section className="ticket-detail-panel">
-        <div className="ticket-section-header">
+      <section className="incident-panel">
+        <div className="incident-section-header">
           <h3>Incident Timeline</h3>
           <span>Review the investigation timeline and add new notes.</span>
         </div>
-        <form className="ticket-form-layout" onSubmit={addTimelineEntry}>
-          <div className="ticket-form-grid">
+        <form className="incident-form-layout" onSubmit={addTimelineEntry}>
+          <div className="incident-form-grid">
             <label>
               Actor
               <input value={timelineActor} onChange={(event) => setTimelineActor(event.target.value)} />
@@ -229,14 +229,14 @@ export function IncidentDetailPage() {
               <input value={timelineSummary} onChange={(event) => setTimelineSummary(event.target.value)} placeholder="Added customer-facing workaround note" />
             </label>
           </div>
-          <div className="ticket-form-actions">
+          <div className="incident-form-actions">
             <button type="submit">Add Timeline Entry</button>
           </div>
         </form>
-        <div className="ticket-detail-stack">
+        <div className="incident-detail-stack">
           {incident.timeline.length ? incident.timeline.map((item) => (
-            <article key={item.id} className="ticket-activity-item">
-              <div className="ticket-activity-meta">
+            <article key={item.id} className="incident-timeline-item">
+              <div className="incident-link-list">
                 <strong>{item.summary}</strong>
                 <span>{item.timestamp}</span>
               </div>
@@ -246,15 +246,15 @@ export function IncidentDetailPage() {
         </div>
       </section>
 
-      <section className="ticket-detail-panel">
-        <div className="ticket-section-header">
+      <section className="incident-panel">
+        <div className="incident-section-header">
           <h3>Recent Incident Activity</h3>
           <span>Latest audit-style actions recorded for this incident.</span>
         </div>
-        <div className="ticket-detail-stack">
+        <div className="incident-detail-stack">
           {incidentActivity.length ? incidentActivity.map((item) => (
-            <article key={item.id} className="ticket-activity-item">
-              <div className="ticket-activity-meta">
+            <article key={item.id} className="incident-timeline-item">
+              <div className="incident-link-list">
                 <strong>{item.summary}</strong>
                 <span>{item.timestamp}</span>
               </div>
