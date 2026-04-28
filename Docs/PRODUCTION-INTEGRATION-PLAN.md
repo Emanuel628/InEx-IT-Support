@@ -59,7 +59,7 @@ Production records and support records should not become the same thing.
 Support records should remain support-side operational objects with:
 
 - notes
-n- linked cases
+- linked cases
 - linked incidents
 - linked resolutions
 - linked knowledge
