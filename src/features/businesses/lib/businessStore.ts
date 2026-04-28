@@ -1,3 +1,4 @@
+import { addActivity } from '@/features/activity/lib/activityStore';
 import { mockBusinesses } from '@/features/businesses/data/mockBusinesses';
 import { readLocalStore, writeLocalStore } from '@/lib/localStorageStore';
 import type { BusinessSupportRecord, CreateBusinessSupportInput } from '@/types/businesses';
@@ -29,6 +30,10 @@ function nextBusinessId(existing: BusinessSupportRecord[]) {
   return `BIZ-${highest + 1}`;
 }
 
+function nowIsoLike() {
+  return new Date().toISOString().slice(0, 16).replace('T', ' ');
+}
+
 export function getBusinesses() {
   return readStoredBusinesses().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
@@ -39,17 +44,57 @@ export function getBusinessById(businessId: string) {
 
 export function createBusiness(input: CreateBusinessSupportInput) {
   const existing = readStoredBusinesses();
-  const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const timestamp = nowIsoLike();
   const record: BusinessSupportRecord = { id: nextBusinessId(existing), updatedAt: timestamp, ...input };
   const next = [record, ...existing];
   writeStoredBusinesses(next);
+
+  addActivity({
+    entityType: 'business',
+    entityId: record.id,
+    action: 'created',
+    actor: 'System',
+    summary: `Business support record ${record.id} was created for ${record.businessName}.`,
+    timestamp,
+    metadata: {
+      plan: record.plan,
+      subscriptionStatus: record.subscriptionStatus,
+      businessLimit: record.businessLimit,
+    },
+  });
+
   return record;
 }
 
 export function updateBusiness(businessId: string, updates: Partial<BusinessSupportRecord>) {
-  const next = readStoredBusinesses().map((record) => record.id === businessId ? { ...record, ...updates, updatedAt: new Date().toISOString().slice(0, 16).replace('T', ' ') } : record);
+  const timestamp = nowIsoLike();
+  const previous = getBusinessById(businessId);
+  const next = readStoredBusinesses().map((record) => record.id === businessId ? { ...record, ...updates, updatedAt: timestamp } : record);
   writeStoredBusinesses(next);
-  return next.find((record) => record.id === businessId) || null;
+  const updated = next.find((record) => record.id === businessId) || null;
+
+  if (updated) {
+    const action = previous && previous.notes !== updated.notes ? 'note_updated' : 'updated';
+    const summary = action === 'note_updated'
+      ? `Support notes were updated for business ${updated.id}.`
+      : `Business ${updated.id} was updated.`;
+
+    addActivity({
+      entityType: 'business',
+      entityId: updated.id,
+      action,
+      actor: 'System',
+      summary,
+      timestamp,
+      metadata: {
+        subscriptionStatus: updated.subscriptionStatus,
+        additionalBusinessSlots: updated.additionalBusinessSlots,
+        linkedIncidentIds: updated.linkedIncidentIds.length,
+      },
+    });
+  }
+
+  return updated;
 }
 
 export function seedDemoData() {
