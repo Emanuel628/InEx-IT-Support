@@ -1,4 +1,4 @@
-export type TicketStatus = 'new' | 'in_progress' | 'waiting_on_user' | 'escalated' | 'resolved';
+export type TicketStatus = 'new' | 'in_progress' | 'waiting_on_user' | 'escalated' | 'resolved' | 'archived';
 
 export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
 
@@ -11,11 +11,14 @@ export type TicketCategory =
   | 'data_integrity'
   | 'ui_ux'
   | 'feature_request'
-  | 'infrastructure';
+  | 'infrastructure'
+  | 'account_access'
+  | 'business_context'
+  | 'deployment';
 
-export type TicketSource = 'manual' | 'email' | 'contact_form';
+export type TicketSource = 'manual' | 'email' | 'contact_form' | 'internal' | 'error_log' | 'incident';
 
-export type TicketEnvironment = 'production' | 'staging' | 'local';
+export type TicketEnvironment = 'production' | 'staging' | 'local' | 'development';
 
 export type TicketAppArea =
   | 'auth'
@@ -27,6 +30,12 @@ export type TicketAppArea =
   | 'billing'
   | 'settings'
   | 'dashboard'
+  | 'onboarding'
+  | 'email'
+  | 'database'
+  | 'api'
+  | 'frontend'
+  | 'deployment'
   | 'unknown';
 
 export type TicketSeverity = 'minor' | 'major' | 'critical';
@@ -68,6 +77,10 @@ export type TicketRecord = {
   relatedBusinessId: string;
   relatedUserId: string;
   relatedRelease: string;
+  relatedErrorIds: string[];
+  relatedIncidentId: string;
+  relatedResolutionId: string;
+  relatedKnowledgeArticleIds: string[];
   tags: string[];
   activity: TicketActivityItem[];
 };
@@ -95,5 +108,9 @@ export type CreateTicketInput = {
   relatedBusinessId: string;
   relatedUserId: string;
   relatedRelease: string;
+  relatedErrorIds: string[];
+  relatedIncidentId: string;
+  relatedResolutionId: string;
+  relatedKnowledgeArticleIds: string[];
   tags: string[];
 };
