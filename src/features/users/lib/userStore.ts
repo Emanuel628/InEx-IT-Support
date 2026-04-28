@@ -1,3 +1,4 @@
+import { addActivity } from '@/features/activity/lib/activityStore';
 import { mockUsers } from '@/features/users/data/mockUsers';
 import { readLocalStore, writeLocalStore } from '@/lib/localStorageStore';
 import type { CreateSupportUserInput, SupportUserRecord } from '@/types/users';
@@ -51,16 +52,55 @@ export function createUser(input: CreateSupportUserInput) {
   };
   const next = [record, ...existing];
   writeStoredUsers(next);
+
+  addActivity({
+    entityType: 'user',
+    entityId: record.id,
+    action: 'created',
+    actor: 'System',
+    summary: `Support user ${record.id} was created for ${record.email}.`,
+    timestamp,
+    metadata: {
+      plan: record.plan,
+      subscriptionStatus: record.subscriptionStatus,
+      region: record.region,
+    },
+  });
+
   return record;
 }
 
 export function updateUser(userId: string, updates: Partial<SupportUserRecord>) {
   const timestamp = nowIsoLike();
+  const previous = getUserById(userId);
   const next = readStoredUsers().map((record) => (
     record.id === userId ? { ...record, ...updates, updatedAt: timestamp } : record
   ));
   writeStoredUsers(next);
-  return next.find((record) => record.id === userId) || null;
+  const updated = next.find((record) => record.id === userId) || null;
+
+  if (updated) {
+    const action = previous && previous.notes !== updated.notes ? 'note_updated' : 'updated';
+    const summary = action === 'note_updated'
+      ? `Support notes were updated for user ${updated.id}.`
+      : `User ${updated.id} was updated.`;
+
+    addActivity({
+      entityType: 'user',
+      entityId: updated.id,
+      action,
+      actor: 'System',
+      summary,
+      timestamp,
+      metadata: {
+        plan: updated.plan,
+        subscriptionStatus: updated.subscriptionStatus,
+        relatedBusinessIds: updated.relatedBusinessIds.length,
+      },
+    });
+  }
+
+  return updated;
 }
 
 export function seedDemoData() {
