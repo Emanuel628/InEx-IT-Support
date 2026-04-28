@@ -1,6 +1,6 @@
 import { mockActivity } from '@/features/activity/data/mockActivity';
 import { readLocalStore, writeLocalStore } from '@/lib/localStorageStore';
-import type { ActivityRecord } from '@/types/activity';
+import type { ActivityEntityType, ActivityRecord } from '@/types/activity';
 
 const STORAGE_KEY = 'inex-it-support:activity';
 const SCHEMA_VERSION_KEY = 'inex-it-support:schema-version';
@@ -31,6 +31,10 @@ function nextActivityId(existing: ActivityRecord[]) {
 
 export function getActivity() {
   return readStoredActivity().sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}
+
+export function getActivityByEntity(entityType: ActivityEntityType, entityId: string) {
+  return getActivity().filter((record) => record.entityType === entityType && record.entityId === entityId);
 }
 
 export function addActivity(input: Omit<ActivityRecord, 'id'>) {
