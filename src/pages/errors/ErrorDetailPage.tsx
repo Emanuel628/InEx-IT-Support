@@ -1,6 +1,9 @@
 import { useMemo, useState, type ChangeEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { updateError, getErrorById } from '@/features/errors/lib/errorStore';
+import { getIncidents } from '@/features/incidents/lib/incidentStore';
+import { getResolutions } from '@/features/resolutions/lib/resolutionStore';
+import { getTickets } from '@/features/tickets/lib/ticketStore';
 import { ERROR_LOG_SEVERITIES, ERROR_LOG_STATUSES } from '@/constants/workflow';
 import type { ErrorLogSeverity, ErrorLogStatus } from '@/types/errors';
 import '@/features/errors/styles/errors.css';
@@ -9,6 +12,9 @@ export function ErrorDetailPage() {
   const { errorId = '' } = useParams();
   const [version, setVersion] = useState(0);
   const record = useMemo(() => getErrorById(errorId), [errorId, version]);
+  const tickets = useMemo(() => getTickets().slice(0, 6), [version]);
+  const incidents = useMemo(() => getIncidents().slice(0, 6), [version]);
+  const resolutions = useMemo(() => getResolutions().slice(0, 6), [version]);
 
   function refresh() {
     setVersion((current) => current + 1);
@@ -105,6 +111,13 @@ export function ErrorDetailPage() {
             Related Resolution ID
             <input defaultValue={record.relatedResolutionId} onBlur={(event) => handleSimpleBlur('relatedResolutionId', event.target.value)} />
           </label>
+        </div>
+
+        <div className="error-link-list">
+          <strong>Available link targets</strong>
+          <small>Tickets: {tickets.map((ticket) => ticket.id).join(', ') || '—'}</small>
+          <small>Incidents: {incidents.map((incident) => incident.id).join(', ') || '—'}</small>
+          <small>Resolutions: {resolutions.map((resolution) => resolution.id).join(', ') || '—'}</small>
         </div>
 
         <div className="error-inline-actions">
