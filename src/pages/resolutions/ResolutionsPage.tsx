@@ -16,7 +16,7 @@ export function ResolutionsPage() {
       const matchesRelease = hasRelease === 'all' || (hasRelease === 'yes' ? Boolean(record.relatedReleaseId) : !record.relatedReleaseId);
       return matchesSearch && matchesIncident && matchesRelease;
     });
-  }, [filtered, hasIncident, hasRelease, resolutions, search]);
+  }, [hasIncident, hasRelease, resolutions, search]);
 
   const linkedIncidentCount = resolutions.filter((record) => record.relatedIncidentId).length;
   const linkedReleaseCount = resolutions.filter((record) => record.relatedReleaseId).length;
