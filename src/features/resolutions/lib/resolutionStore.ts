@@ -1,3 +1,4 @@
+import { addActivity } from '@/features/activity/lib/activityStore';
 import { mockResolutions } from '@/features/resolutions/data/mockResolutions';
 import { readLocalStore, writeLocalStore } from '@/lib/localStorageStore';
 import type { CreateResolutionInput, ResolutionRecord } from '@/types/resolutions';
@@ -29,6 +30,10 @@ function nextResolutionId(existing: ResolutionRecord[]) {
   return `RES-${highest + 1}`;
 }
 
+function nowIsoLike() {
+  return new Date().toISOString().slice(0, 16).replace('T', ' ');
+}
+
 export function getResolutions() {
   return readStoredResolutions().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
@@ -39,17 +44,57 @@ export function getResolutionById(resolutionId: string) {
 
 export function createResolution(input: CreateResolutionInput) {
   const existing = readStoredResolutions();
-  const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const timestamp = nowIsoLike();
   const record: ResolutionRecord = { id: nextResolutionId(existing), createdAt: timestamp, updatedAt: timestamp, ...input };
   const next = [record, ...existing];
   writeStoredResolutions(next);
+
+  addActivity({
+    entityType: 'resolution',
+    entityId: record.id,
+    action: 'created',
+    actor: 'System',
+    summary: `Resolution ${record.id} was created for ${record.title}.`,
+    timestamp,
+    metadata: {
+      relatedTicketIds: record.relatedTicketIds.length,
+      relatedErrorIds: record.relatedErrorIds.length,
+      relatedKnowledgeArticleIds: record.relatedKnowledgeArticleIds.length,
+    },
+  });
+
   return record;
 }
 
 export function updateResolution(resolutionId: string, updates: Partial<ResolutionRecord>) {
-  const next = readStoredResolutions().map((record) => record.id === resolutionId ? { ...record, ...updates, updatedAt: new Date().toISOString().slice(0, 16).replace('T', ' ') } : record);
+  const timestamp = nowIsoLike();
+  const previous = getResolutionById(resolutionId);
+  const next = readStoredResolutions().map((record) => record.id === resolutionId ? { ...record, ...updates, updatedAt: timestamp } : record);
   writeStoredResolutions(next);
-  return next.find((record) => record.id === resolutionId) || null;
+  const updated = next.find((record) => record.id === resolutionId) || null;
+
+  if (updated) {
+    const action = previous && previous.rollbackNotes !== updated.rollbackNotes ? 'note_updated' : 'updated';
+    const summary = action === 'note_updated'
+      ? `Rollback or verification notes were updated for resolution ${updated.id}.`
+      : `Resolution ${updated.id} was updated.`;
+
+    addActivity({
+      entityType: 'resolution',
+      entityId: updated.id,
+      action,
+      actor: 'System',
+      summary,
+      timestamp,
+      metadata: {
+        relatedIncidentId: updated.relatedIncidentId || '',
+        relatedReleaseId: updated.relatedReleaseId || '',
+        relatedKnowledgeArticleIds: updated.relatedKnowledgeArticleIds.length,
+      },
+    });
+  }
+
+  return updated;
 }
 
 export function seedDemoData() {
