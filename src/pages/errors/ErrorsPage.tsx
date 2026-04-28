@@ -14,25 +14,31 @@ export function ErrorsPage() {
   const [status, setStatus] = useState<'all' | ErrorLogStatus>('all');
   const [severity, setSeverity] = useState<'all' | ErrorLogSeverity>('all');
   const [source, setSource] = useState('all');
+  const [environment, setEnvironment] = useState('all');
+  const [appArea, setAppArea] = useState('all');
 
   const filteredErrors = useMemo(() => {
     return errors.filter((record) => {
       const matchesSearch = !search.trim()
-        || [record.id, record.title, record.message, record.appArea, record.environment]
+        || [record.id, record.title, record.message, record.appArea, record.environment, record.notes]
           .join(' ')
           .toLowerCase()
           .includes(search.trim().toLowerCase());
       const matchesStatus = status === 'all' || record.status === status;
       const matchesSeverity = severity === 'all' || record.severity === severity;
       const matchesSource = source === 'all' || record.source === source;
-      return matchesSearch && matchesStatus && matchesSeverity && matchesSource;
+      const matchesEnvironment = environment === 'all' || record.environment === environment;
+      const matchesAppArea = appArea === 'all' || record.appArea === appArea;
+      return matchesSearch && matchesStatus && matchesSeverity && matchesSource && matchesEnvironment && matchesAppArea;
     });
-  }, [errors, search, severity, source, status]);
+  }, [appArea, environment, errors, search, severity, source, status]);
 
   const newCount = errors.filter((record) => record.status === 'new').length;
   const recurringCount = errors.filter((record) => record.status === 'recurring').length;
   const criticalCount = errors.filter((record) => record.severity === 'critical').length;
   const linkedCount = errors.filter((record) => record.relatedTicketIds.length || record.relatedIncidentId || record.relatedResolutionId).length;
+  const investigatingCount = errors.filter((record) => record.status === 'investigating').length;
+  const unresolvedCount = errors.filter((record) => !['fixed', 'ignored'].includes(record.status)).length;
 
   return (
     <section className="error-workspace-page">
@@ -53,24 +59,26 @@ export function ErrorsPage() {
         <article className="error-stat-card"><span>New</span><strong>{newCount}</strong></article>
         <article className="error-stat-card"><span>Critical</span><strong>{criticalCount}</strong></article>
         <article className="error-stat-card"><span>Recurring</span><strong>{recurringCount}</strong></article>
+        <article className="error-stat-card"><span>Investigating</span><strong>{investigatingCount}</strong></article>
+        <article className="error-stat-card"><span>Unresolved</span><strong>{unresolvedCount}</strong></article>
         <article className="error-stat-card"><span>Linked Records</span><strong>{linkedCount}</strong></article>
       </div>
 
       <section className="error-panel">
         <div className="error-section-header">
           <h3>Search + Filters</h3>
-          <span>Source, severity, and status filters for technical triage</span>
+          <span>Source, environment, app area, severity, and status filters for technical triage</span>
         </div>
 
-        <div className="error-filters-bar">
-          <div className="error-filter-group">
+        <div className="error-filters-bar error-filters-bar-wide">
+          <div className="error-filter-group error-filter-search">
             <label>
               Search
               <input
                 type="text"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by id, title, message, app area, or environment"
+                placeholder="Search by id, title, message, app area, environment, or notes"
               />
             </label>
           </div>
@@ -109,6 +117,30 @@ export function ErrorsPage() {
               <select value={source} onChange={(event) => setSource(event.target.value)}>
                 <option value="all">All sources</option>
                 {Array.from(new Set(errors.map((record) => record.source))).map((value) => (
+                  <option key={value} value={value}>{value}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="error-filter-group">
+            <label>
+              Environment
+              <select value={environment} onChange={(event) => setEnvironment(event.target.value)}>
+                <option value="all">All environments</option>
+                {Array.from(new Set(errors.map((record) => record.environment))).map((value) => (
+                  <option key={value} value={value}>{value}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="error-filter-group">
+            <label>
+              App Area
+              <select value={appArea} onChange={(event) => setAppArea(event.target.value)}>
+                <option value="all">All app areas</option>
+                {Array.from(new Set(errors.map((record) => record.appArea))).map((value) => (
                   <option key={value} value={value}>{value}</option>
                 ))}
               </select>
@@ -162,7 +194,7 @@ export function ErrorsPage() {
       ) : (
         <section className="error-empty-state">
           <span>No matching errors</span>
-          <p>Try a broader search or reset the status, severity, and source filters.</p>
+          <p>Try a broader search or reset the status, severity, source, environment, and app-area filters.</p>
         </section>
       )}
     </section>
