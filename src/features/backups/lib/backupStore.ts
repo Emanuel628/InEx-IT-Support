@@ -1,3 +1,4 @@
+import { addActivity } from '@/features/activity/lib/activityStore';
 import { readLocalStore, writeLocalStore } from '@/lib/localStorageStore';
 import type { BackupRecord } from '@/types/backups';
 
@@ -30,6 +31,10 @@ function nextBackupId(existing: BackupRecord[]) {
   return `BKP-${highest + 1}`;
 }
 
+function nowIsoLike() {
+  return new Date().toISOString().slice(0, 16).replace('T', ' ');
+}
+
 export function getBackups() {
   return readStoredBackups().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
@@ -43,20 +48,67 @@ export function createBackup(input: Omit<BackupRecord, 'id'>) {
   const record: BackupRecord = { id: nextBackupId(existing), ...input };
   const next = [record, ...existing];
   writeStoredBackups(next);
+
+  addActivity({
+    entityType: 'backup',
+    entityId: record.id,
+    action: 'created',
+    actor: 'System',
+    summary: `Backup ${record.id} was created with label ${record.label}.`,
+    timestamp: record.createdAt,
+    metadata: {
+      schemaVersion: record.schemaVersion,
+      moduleCount: Object.keys(record.itemCounts).length,
+    },
+  });
+
   return record;
 }
 
 export function updateBackup(backupId: string, updates: Partial<BackupRecord>) {
+  const timestamp = nowIsoLike();
   const next = readStoredBackups().map((record) => (
     record.id === backupId ? { ...record, ...updates } : record
   ));
   writeStoredBackups(next);
-  return next.find((record) => record.id === backupId) || null;
+  const updated = next.find((record) => record.id === backupId) || null;
+
+  if (updated) {
+    addActivity({
+      entityType: 'backup',
+      entityId: updated.id,
+      action: 'updated',
+      actor: 'System',
+      summary: `Backup ${updated.id} was updated.`,
+      timestamp,
+      metadata: {
+        label: updated.label,
+      },
+    });
+  }
+
+  return updated;
 }
 
 export function deleteBackup(backupId: string) {
-  const next = readStoredBackups().filter((record) => record.id !== backupId);
+  const existing = readStoredBackups();
+  const deleted = existing.find((record) => record.id === backupId) || null;
+  const next = existing.filter((record) => record.id !== backupId);
   writeStoredBackups(next);
+
+  if (deleted) {
+    addActivity({
+      entityType: 'backup',
+      entityId: deleted.id,
+      action: 'deleted',
+      actor: 'System',
+      summary: `Backup ${deleted.id} was deleted.`,
+      timestamp: nowIsoLike(),
+      metadata: {
+        label: deleted.label,
+      },
+    });
+  }
 }
 
 export function seedDemoData() {
