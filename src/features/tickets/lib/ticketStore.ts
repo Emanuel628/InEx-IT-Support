@@ -1,3 +1,4 @@
+import { addActivity } from '@/features/activity/lib/activityStore';
 import type { TicketActivityItem } from '@/features/tickets/data/mockTicketActivity';
 import { mockTickets } from '@/features/tickets/data/mockTickets';
 import { readLocalStore, writeLocalStore } from '@/lib/localStorageStore';
@@ -164,18 +165,35 @@ export function createTicket(input: CreateTicketInput) {
 
   const nextTickets = [ticket, ...existing];
   writeStoredTickets(nextTickets);
+
+  addActivity({
+    entityType: 'ticket',
+    entityId: ticket.id,
+    action: 'created',
+    actor: ticket.assignedTech || 'System',
+    summary: `Ticket ${ticket.id} was created for ${ticket.appArea} in ${ticket.environment}.`,
+    timestamp,
+    metadata: {
+      status: ticket.status,
+      priority: ticket.priority,
+      severity: ticket.severity,
+    },
+  });
+
   return ticket;
 }
 
 export function updateTicketStatus(ticketId: string, status: TicketStatus) {
   const tickets = readStoredTickets();
+  let changedTicket: TicketRecord | null = null;
+
   const next = tickets.map((ticket) => {
     if (ticket.id !== ticketId || ticket.status === status) {
       return ticket;
     }
 
     const updatedAt = nowIsoLike();
-    return prependActivity(
+    const updatedTicket = prependActivity(
       {
         ...ticket,
         status,
@@ -187,14 +205,32 @@ export function updateTicketStatus(ticketId: string, status: TicketStatus) {
       },
       updatedAt,
     );
+    changedTicket = updatedTicket;
+    return updatedTicket;
   });
 
   writeStoredTickets(next);
+
+  if (changedTicket) {
+    addActivity({
+      entityType: 'ticket',
+      entityId: changedTicket.id,
+      action: 'status_changed',
+      actor: 'System',
+      summary: `Ticket ${changedTicket.id} status changed to ${changedTicket.status.replace(/_/g, ' ')}.`,
+      timestamp: changedTicket.updatedAt,
+      metadata: {
+        status: changedTicket.status,
+        priority: changedTicket.priority,
+      },
+    });
+  }
 }
 
 export function updateTicketAssignment(ticketId: string, assignedTech: string) {
   const tickets = readStoredTickets();
   const cleanAssignedTech = assignedTech.trim() || 'Unassigned';
+  let changedTicket: TicketRecord | null = null;
 
   const next = tickets.map((ticket) => {
     if (ticket.id !== ticketId || ticket.assignedTech === cleanAssignedTech) {
@@ -202,7 +238,7 @@ export function updateTicketAssignment(ticketId: string, assignedTech: string) {
     }
 
     const updatedAt = nowIsoLike();
-    return prependActivity(
+    const updatedTicket = prependActivity(
       {
         ...ticket,
         assignedTech: cleanAssignedTech,
@@ -214,13 +250,30 @@ export function updateTicketAssignment(ticketId: string, assignedTech: string) {
       },
       updatedAt,
     );
+    changedTicket = updatedTicket;
+    return updatedTicket;
   });
 
   writeStoredTickets(next);
+
+  if (changedTicket) {
+    addActivity({
+      entityType: 'ticket',
+      entityId: changedTicket.id,
+      action: 'assigned',
+      actor: 'System',
+      summary: `Ticket ${changedTicket.id} was assigned to ${changedTicket.assignedTech}.`,
+      timestamp: changedTicket.updatedAt,
+      metadata: {
+        assignedTech: changedTicket.assignedTech,
+      },
+    });
+  }
 }
 
 export function updateTicketPriority(ticketId: string, priority: TicketPriority) {
   const tickets = readStoredTickets();
+  let changedTicket: TicketRecord | null = null;
 
   const next = tickets.map((ticket) => {
     if (ticket.id !== ticketId || ticket.priority === priority) {
@@ -228,7 +281,7 @@ export function updateTicketPriority(ticketId: string, priority: TicketPriority)
     }
 
     const updatedAt = nowIsoLike();
-    return prependActivity(
+    const updatedTicket = prependActivity(
       {
         ...ticket,
         priority,
@@ -240,9 +293,25 @@ export function updateTicketPriority(ticketId: string, priority: TicketPriority)
       },
       updatedAt,
     );
+    changedTicket = updatedTicket;
+    return updatedTicket;
   });
 
   writeStoredTickets(next);
+
+  if (changedTicket) {
+    addActivity({
+      entityType: 'ticket',
+      entityId: changedTicket.id,
+      action: 'priority_changed',
+      actor: 'System',
+      summary: `Ticket ${changedTicket.id} priority changed to ${changedTicket.priority}.`,
+      timestamp: changedTicket.updatedAt,
+      metadata: {
+        priority: changedTicket.priority,
+      },
+    });
+  }
 }
 
 export function getTicketActivity(ticketId: string): TicketActivityItem[] {
