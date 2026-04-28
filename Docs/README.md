@@ -86,6 +86,7 @@ Key docs include:
 
 - `BUILD-PLAN.md`
 - `Docs/README.md`
+- `Docs/PRODUCTION-INTEGRATION-PLAN.md`
 
 ## Source of truth
 
