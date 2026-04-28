@@ -21,29 +21,32 @@ export function ReportsPage() {
   const ticketsByCategory = countBy(tickets.map((record) => record.category));
   const ticketsByAppArea = countBy(tickets.map((record) => record.appArea));
   const ticketsByPriority = countBy(tickets.map((record) => record.priority));
+  const ticketsBySeverity = countBy(tickets.map((record) => record.severity));
   const ticketsByEnvironment = countBy(tickets.map((record) => record.environment));
   const errorsBySource = countBy(errors.map((record) => record.source));
   const errorsByAppArea = countBy(errors.map((record) => record.appArea));
   const incidentsByStatus = countBy(incidents.map((record) => record.status));
   const incidentsBySeverity = countBy(incidents.map((record) => record.severity));
 
-  const mostAffectedBusinesses = businesses
+  const businessImpactRows = businesses
     .map((record) => ({
       id: record.id,
       businessName: record.businessName,
       issueCount: record.linkedTicketIds.length + record.linkedErrorIds.length + record.linkedIncidentIds.length,
       subscriptionStatus: record.subscriptionStatus,
     }))
-    .sort((a, b) => b.issueCount - a.issueCount)
-    .slice(0, 8);
+    .sort((a, b) => b.issueCount - a.issueCount);
 
+  const mostAffectedBusinesses = businessImpactRows.slice(0, 8);
+  const businessesWithIssuesCount = businessImpactRows.filter((record) => record.issueCount > 0).length;
   const repeatedIssuePatterns = ticketsByCategory.slice(0, 8);
 
   const reportSections = [
     { title: 'Tickets by Status', rows: ticketsByStatus, valueLabel: 'Tickets' },
     { title: 'Tickets by Category', rows: ticketsByCategory, valueLabel: 'Tickets' },
     { title: 'Tickets by App Area', rows: ticketsByAppArea, valueLabel: 'Tickets' },
-    { title: 'Tickets by Priority / Severity', rows: ticketsByPriority, valueLabel: 'Tickets' },
+    { title: 'Tickets by Priority', rows: ticketsByPriority, valueLabel: 'Tickets' },
+    { title: 'Tickets by Severity', rows: ticketsBySeverity, valueLabel: 'Tickets' },
     { title: 'Tickets by Environment', rows: ticketsByEnvironment, valueLabel: 'Tickets' },
     { title: 'Errors by Source', rows: errorsBySource, valueLabel: 'Errors' },
     { title: 'Errors by App Area', rows: errorsByAppArea, valueLabel: 'Errors' },
@@ -66,7 +69,7 @@ export function ReportsPage() {
         <article className="ticket-stat-card"><span>Total Tickets</span><strong>{tickets.length}</strong></article>
         <article className="ticket-stat-card"><span>Total Errors</span><strong>{errors.length}</strong></article>
         <article className="ticket-stat-card"><span>Total Incidents</span><strong>{incidents.length}</strong></article>
-        <article className="ticket-stat-card"><span>Businesses With Issues</span><strong>{mostAffectedBusinesses.filter((record) => record.issueCount > 0).length}</strong></article>
+        <article className="ticket-stat-card"><span>Businesses With Issues</span><strong>{businessesWithIssuesCount}</strong></article>
       </div>
 
       <div className="ticket-detail-grid">
