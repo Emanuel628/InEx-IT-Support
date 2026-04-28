@@ -1,8 +1,10 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ErrorLinkActions } from '@/features/errors/components/ErrorLinkActions';
 import { createError } from '@/features/errors/lib/errorStore';
 import { getIncidents } from '@/features/incidents/lib/incidentStore';
 import { getResolutions } from '@/features/resolutions/lib/resolutionStore';
+import { getReleases } from '@/features/releases/lib/releaseStore';
 import { getTickets } from '@/features/tickets/lib/ticketStore';
 import { ERROR_LOG_APP_AREAS, ERROR_LOG_ENVIRONMENTS, ERROR_LOG_SEVERITIES, ERROR_LOG_SOURCES, ERROR_LOG_STATUSES } from '@/constants/workflow';
 import type { CreateErrorLogInput, ErrorLogAppArea, ErrorLogEnvironment, ErrorLogSeverity, ErrorLogSource, ErrorLogStatus } from '@/types/errors';
@@ -40,6 +42,7 @@ export function CreateErrorPage() {
   const tickets = useMemo(() => getTickets().slice(0, 6), []);
   const incidents = useMemo(() => getIncidents().slice(0, 6), []);
   const resolutions = useMemo(() => getResolutions().slice(0, 6), []);
+  const releases = useMemo(() => getReleases().slice(0, 6), []);
   const [form, setForm] = useState<CreateErrorLogInput>({
     ...initialForm,
     firstSeenAt: nowIsoLike(),
@@ -66,6 +69,23 @@ export function CreateErrorPage() {
     });
 
     navigate(`/errors/${record.id}`);
+  }
+
+  function toggleTicketLink(ticketId: string) {
+    setForm((current) => ({
+      ...current,
+      relatedTicketIds: current.relatedTicketIds.includes(ticketId)
+        ? current.relatedTicketIds.filter((value) => value !== ticketId)
+        : [...current.relatedTicketIds, ticketId],
+      status: current.relatedTicketIds.includes(ticketId) ? current.status : 'linked_to_ticket',
+    }));
+  }
+
+  function toggleSingleLink(key: 'relatedIncidentId' | 'relatedResolutionId' | 'relatedReleaseId', value: string) {
+    setForm((current) => ({
+      ...current,
+      [key]: current[key] === value ? '' : value,
+    }));
   }
 
   return (
@@ -164,10 +184,36 @@ export function CreateErrorPage() {
 
           <div className="error-link-list">
             <strong>Available link targets</strong>
-            <small>Tickets: {tickets.map((ticket) => ticket.id).join(', ') || '—'}</small>
-            <small>Incidents: {incidents.map((incident) => incident.id).join(', ') || '—'}</small>
-            <small>Resolutions: {resolutions.map((resolution) => resolution.id).join(', ') || '—'}</small>
+            <small>Use the buttons below to link related records quickly before saving.</small>
           </div>
+
+          <ErrorLinkActions
+            title="Tickets"
+            records={tickets}
+            activeIds={form.relatedTicketIds}
+            onToggle={toggleTicketLink}
+          />
+
+          <ErrorLinkActions
+            title="Incidents"
+            records={incidents}
+            activeIds={form.relatedIncidentId ? [form.relatedIncidentId] : []}
+            onToggle={(id) => toggleSingleLink('relatedIncidentId', id)}
+          />
+
+          <ErrorLinkActions
+            title="Resolutions"
+            records={resolutions}
+            activeIds={form.relatedResolutionId ? [form.relatedResolutionId] : []}
+            onToggle={(id) => toggleSingleLink('relatedResolutionId', id)}
+          />
+
+          <ErrorLinkActions
+            title="Releases"
+            records={releases}
+            activeIds={form.relatedReleaseId ? [form.relatedReleaseId] : []}
+            onToggle={(id) => toggleSingleLink('relatedReleaseId', id)}
+          />
 
           <label>
             Message
