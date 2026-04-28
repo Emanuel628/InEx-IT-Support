@@ -87,6 +87,24 @@ export function ErrorDetailPage() {
     updateAndRefresh({ status: nextStatus });
   }
 
+  function toggleTicketLink(ticketId: string) {
+    const exists = record.relatedTicketIds.includes(ticketId);
+    const nextTicketIds = exists
+      ? record.relatedTicketIds.filter((value) => value !== ticketId)
+      : [...record.relatedTicketIds, ticketId];
+
+    updateAndRefresh({
+      relatedTicketIds: nextTicketIds,
+      status: nextTicketIds.length ? 'linked_to_ticket' : record.status,
+    });
+  }
+
+  function toggleSingleLink<K extends 'relatedIncidentId' | 'relatedResolutionId' | 'relatedReleaseId'>(key: K, value: string) {
+    updateAndRefresh({
+      [key]: record[key] === value ? '' : value,
+    } as Pick<typeof record, K>);
+  }
+
   return (
     <section className="error-workspace-page">
       <div className="error-page-header">
@@ -175,10 +193,55 @@ export function ErrorDetailPage() {
 
         <div className="error-link-list">
           <strong>Available link targets</strong>
-          <small>Tickets: {tickets.map((ticket) => ticket.id).join(', ') || '—'}</small>
-          <small>Incidents: {incidents.map((incident) => incident.id).join(', ') || '—'}</small>
-          <small>Resolutions: {resolutions.map((resolution) => resolution.id).join(', ') || '—'}</small>
-          <small>Releases: {releases.map((release) => release.id).join(', ') || '—'}</small>
+          <small>Use the buttons below to link or unlink related records quickly.</small>
+        </div>
+
+        <div className="error-inline-actions">
+          {tickets.map((ticket) => (
+            <button
+              key={ticket.id}
+              type="button"
+              onClick={() => toggleTicketLink(ticket.id)}
+            >
+              {record.relatedTicketIds.includes(ticket.id) ? `Unlink ${ticket.id}` : `Link ${ticket.id}`}
+            </button>
+          ))}
+        </div>
+
+        <div className="error-inline-actions">
+          {incidents.map((incident) => (
+            <button
+              key={incident.id}
+              type="button"
+              onClick={() => toggleSingleLink('relatedIncidentId', incident.id)}
+            >
+              {record.relatedIncidentId === incident.id ? `Unlink ${incident.id}` : `Link ${incident.id}`}
+            </button>
+          ))}
+        </div>
+
+        <div className="error-inline-actions">
+          {resolutions.map((resolution) => (
+            <button
+              key={resolution.id}
+              type="button"
+              onClick={() => toggleSingleLink('relatedResolutionId', resolution.id)}
+            >
+              {record.relatedResolutionId === resolution.id ? `Unlink ${resolution.id}` : `Link ${resolution.id}`}
+            </button>
+          ))}
+        </div>
+
+        <div className="error-inline-actions">
+          {releases.map((release) => (
+            <button
+              key={release.id}
+              type="button"
+              onClick={() => toggleSingleLink('relatedReleaseId', release.id)}
+            >
+              {record.relatedReleaseId === release.id ? `Unlink ${release.id}` : `Link ${release.id}`}
+            </button>
+          ))}
         </div>
 
         <div className="error-inline-actions">
