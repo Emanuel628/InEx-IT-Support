@@ -3,6 +3,7 @@ import express from 'express';
 import helmet from 'helmet';
 import { env } from './config/env.js';
 import { authRouter } from './routes/auth.js';
+import { setupRouter } from './routes/setup.js';
 import { supportRouter } from './routes/support.js';
 import { systemRouter } from './routes/system.js';
 import { ticketsRouter } from './routes/tickets.js';
@@ -23,6 +24,7 @@ export function createApp() {
   });
 
   app.use(systemRouter);
+  app.use(setupRouter);
   app.use(authRouter);
   app.use(supportRouter);
   app.use(ticketsRouter);
