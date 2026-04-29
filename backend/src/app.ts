@@ -5,6 +5,7 @@ import { env } from './config/env.js';
 import { authRouter } from './routes/auth.js';
 import { supportRouter } from './routes/support.js';
 import { systemRouter } from './routes/system.js';
+import { ticketsRouter } from './routes/tickets.js';
 
 export function createApp() {
   const app = express();
@@ -24,6 +25,7 @@ export function createApp() {
   app.use(systemRouter);
   app.use(authRouter);
   app.use(supportRouter);
+  app.use(ticketsRouter);
 
   return app;
 }
