@@ -1,5 +1,11 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { getDbPool } from '../db/client.js';
+import { verifyPassword } from '../auth/password.js';
+import {
+  findInternalSupportAccountByCompanyId,
+  touchInternalSupportAccountLastLogin,
+} from '../repositories/internalSupportAccounts.js';
 
 const loginSchema = z.object({
   companyId: z.string().min(1),
@@ -8,7 +14,7 @@ const loginSchema = z.object({
 
 export const authRouter = Router();
 
-authRouter.post('/auth/login', (request, response) => {
+authRouter.post('/auth/login', async (request, response) => {
   const parsed = loginSchema.safeParse(request.body);
 
   if (!parsed.success) {
@@ -19,9 +25,43 @@ authRouter.post('/auth/login', (request, response) => {
     });
   }
 
-  return response.status(501).json({
-    ok: false,
-    message: 'Company ID login is not implemented yet.',
+  if (!getDbPool()) {
+    return response.status(503).json({
+      ok: false,
+      message: 'Database is not configured yet.',
+    });
+  }
+
+  const account = await findInternalSupportAccountByCompanyId(parsed.data.companyId);
+
+  if (!account || !account.is_active) {
+    return response.status(401).json({
+      ok: false,
+      message: 'Invalid company ID or password.',
+    });
+  }
+
+  const passwordOk = await verifyPassword(parsed.data.password, account.password_hash);
+
+  if (!passwordOk) {
+    return response.status(401).json({
+      ok: false,
+      message: 'Invalid company ID or password.',
+    });
+  }
+
+  await touchInternalSupportAccountLastLogin(account.id);
+
+  return response.status(200).json({
+    ok: true,
+    message: 'Login scaffold is now connected to account lookup.',
+    user: {
+      id: account.id,
+      companyId: account.company_id,
+      displayName: account.display_name,
+      email: account.email,
+      role: account.role,
+    },
   });
 });
 
