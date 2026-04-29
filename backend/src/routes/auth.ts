@@ -6,6 +6,7 @@ import { requireAuth } from '../middleware/requireAuth.js';
 import { verifyPassword } from '../auth/password.js';
 import {
   findInternalSupportAccountByCompanyId,
+  findInternalSupportAccountById,
   touchInternalSupportAccountLastLogin,
 } from '../repositories/internalSupportAccounts.js';
 
@@ -70,17 +71,47 @@ authRouter.post('/auth/login', async (request, response) => {
       displayName: account.display_name,
       email: account.email,
       role: account.role,
+      isActive: account.is_active,
     },
   });
 });
 
-authRouter.get('/auth/me', requireAuth, (request, response) => {
+authRouter.get('/auth/me', requireAuth, async (request, response) => {
+  const accountId = request.auth?.sub;
+
+  if (!accountId) {
+    return response.status(401).json({
+      ok: false,
+      message: 'Authentication required.',
+    });
+  }
+
+  const account = await findInternalSupportAccountById(accountId);
+
+  if (!account || !account.is_active) {
+    return response.status(401).json({
+      ok: false,
+      message: 'Authenticated account is not available.',
+    });
+  }
+
   return response.status(200).json({
     ok: true,
     user: {
-      id: request.auth?.sub,
-      companyId: request.auth?.companyId,
-      role: request.auth?.role,
+      id: account.id,
+      companyId: account.company_id,
+      displayName: account.display_name,
+      email: account.email,
+      role: account.role,
+      isActive: account.is_active,
+      lastLoginAt: account.last_login_at,
     },
+  });
+});
+
+authRouter.post('/auth/logout', requireAuth, (_request, response) => {
+  return response.status(200).json({
+    ok: true,
+    message: 'Logout is handled by discarding the client token for now.',
   });
 });
