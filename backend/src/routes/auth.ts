@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { createAuthToken } from '../auth/token.js';
 import { getDbPool } from '../db/client.js';
+import { requireAuth } from '../middleware/requireAuth.js';
 import { verifyPassword } from '../auth/password.js';
 import {
   findInternalSupportAccountByCompanyId,
@@ -52,9 +54,16 @@ authRouter.post('/auth/login', async (request, response) => {
 
   await touchInternalSupportAccountLastLogin(account.id);
 
+  const token = createAuthToken({
+    sub: account.id,
+    companyId: account.company_id,
+    role: account.role,
+  });
+
   return response.status(200).json({
     ok: true,
-    message: 'Login scaffold is now connected to account lookup.',
+    message: 'Login successful.',
+    token,
     user: {
       id: account.id,
       companyId: account.company_id,
@@ -65,9 +74,13 @@ authRouter.post('/auth/login', async (request, response) => {
   });
 });
 
-authRouter.get('/auth/me', (_request, response) => {
-  return response.status(501).json({
-    ok: false,
-    message: 'Current-user lookup is not implemented yet.',
+authRouter.get('/auth/me', requireAuth, (request, response) => {
+  return response.status(200).json({
+    ok: true,
+    user: {
+      id: request.auth?.sub,
+      companyId: request.auth?.companyId,
+      role: request.auth?.role,
+    },
   });
 });
