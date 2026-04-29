@@ -7,6 +7,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1).optional(),
   CORS_ORIGIN: z.string().min(1).default('http://localhost:5173'),
   AUTH_TOKEN_SECRET: z.string().min(1).default('change-me'),
+  BOOTSTRAP_SETUP_SECRET: z.string().min(1).optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
