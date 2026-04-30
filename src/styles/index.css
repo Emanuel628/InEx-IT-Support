@@ -235,17 +235,49 @@ a {
     linear-gradient(180deg, rgba(15, 23, 42, 0.82) 0%, rgba(15, 23, 42, 0.72) 100%);
   padding: 28px;
   box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: 20px;
+}
+
+.placeholder-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
 }
 
 .placeholder-page h2 {
-  margin: 0 0 8px;
-  font-size: 1.72rem;
-  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  font-size: clamp(1.95rem, 2.4vw, 2.35rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
 }
 
-.placeholder-page p {
-  margin: 0 0 20px;
+.placeholder-page p,
+.placeholder-empty-state p {
+  margin: 0;
   color: var(--text-secondary);
+}
+
+.placeholder-page-action {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.placeholder-page-action button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.22) 0%, rgba(79, 70, 229, 0.16) 100%);
+  color: #eef2ff;
+  font-weight: 600;
+}
+
+.placeholder-page-action span {
+  color: var(--text-secondary);
+  font-size: 0.84rem;
 }
 
 .placeholder-grid {
@@ -257,14 +289,33 @@ a {
 .placeholder-card {
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
-  padding: 16px;
+  padding: 18px;
   background:
     linear-gradient(180deg, rgba(30, 41, 59, 0.58) 0%, rgba(15, 23, 42, 0.58) 100%);
+  box-shadow: 0 18px 30px rgba(2, 6, 23, 0.18);
 }
 
 .placeholder-card strong {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  font-size: 0.98rem;
+}
+
+.placeholder-card span {
+  color: var(--text-secondary);
+}
+
+.placeholder-empty-state {
+  display: grid;
+  gap: 8px;
+  border: 1px dashed rgba(148, 163, 184, 0.2);
+  border-radius: 20px;
+  padding: 22px;
+  background: rgba(15, 23, 42, 0.26);
+}
+
+.placeholder-empty-state strong {
+  font-size: 1rem;
 }
 
 @media (max-width: 920px) {
@@ -277,12 +328,17 @@ a {
     border-bottom: 1px solid var(--border-soft);
   }
 
-  .topbar {
+  .topbar,
+  .placeholder-page-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
   .topbar-pill {
     white-space: normal;
+  }
+
+  .placeholder-page-action {
+    justify-items: start;
   }
 }
