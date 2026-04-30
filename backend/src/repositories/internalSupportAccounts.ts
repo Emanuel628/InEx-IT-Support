@@ -19,7 +19,7 @@ export async function countInternalSupportAccounts() {
   const db = getDbPool();
 
   if (!db) {
-    return 0;
+    throw new Error('Database is not configured.');
   }
 
   const result = await db.query<{ count: string }>('select count(*)::text as count from internal_support_accounts');
