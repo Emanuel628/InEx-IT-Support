@@ -3,6 +3,7 @@ import express from 'express';
 import helmet from 'helmet';
 import { env } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { activityRouter } from './routes/activity.js';
 import { authRouter } from './routes/auth.js';
 import { setupRouter } from './routes/setup.js';
 import { supportRouter } from './routes/support.js';
@@ -29,6 +30,7 @@ export function createApp() {
   app.use(authRouter);
   app.use(supportRouter);
   app.use(ticketsRouter);
+  app.use(activityRouter);
 
   app.use((_request, response) => {
     response.status(404).json({
