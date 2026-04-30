@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { env } from './config/env.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { activityRouter } from './routes/activity.js';
+import { accountsRouter } from './routes/accounts.js';
 import { authRouter } from './routes/auth.js';
 import { setupRouter } from './routes/setup.js';
 import { supportRouter } from './routes/support.js';
@@ -29,6 +30,7 @@ export function createApp() {
   app.use(setupRouter);
   app.use(authRouter);
   app.use(supportRouter);
+  app.use(accountsRouter);
   app.use(ticketsRouter);
   app.use(activityRouter);
 
