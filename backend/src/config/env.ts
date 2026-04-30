@@ -18,4 +18,16 @@ if (!parsed.success) {
   process.exit(1);
 }
 
+if (parsed.data.NODE_ENV === 'production') {
+  if (parsed.data.AUTH_TOKEN_SECRET === 'change-me') {
+    console.error('AUTH_TOKEN_SECRET must be replaced in production.');
+    process.exit(1);
+  }
+
+  if (parsed.data.BOOTSTRAP_SETUP_SECRET === 'change-me-bootstrap-secret') {
+    console.error('BOOTSTRAP_SETUP_SECRET must be replaced in production when set.');
+    process.exit(1);
+  }
+}
+
 export const env = parsed.data;
