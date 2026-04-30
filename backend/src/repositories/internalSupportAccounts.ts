@@ -15,6 +15,9 @@ export type InternalSupportAccountRecord = {
   last_login_at: string | null;
 };
 
+const accountSelect = `select id, company_id, display_name, email, password_hash, role, is_active, created_at, updated_at, last_login_at
+     from internal_support_accounts`;
+
 export async function countInternalSupportAccounts() {
   const db = getDbPool();
 
@@ -26,6 +29,17 @@ export async function countInternalSupportAccounts() {
   return Number(result.rows[0]?.count ?? '0');
 }
 
+export async function listInternalSupportAccounts() {
+  const db = getDbPool();
+
+  if (!db) {
+    throw new Error('Database is not configured.');
+  }
+
+  const result = await db.query<InternalSupportAccountRecord>(`${accountSelect} order by created_at asc`);
+  return result.rows;
+}
+
 export async function findInternalSupportAccountByCompanyId(companyId: string) {
   const db = getDbPool();
 
@@ -34,11 +48,27 @@ export async function findInternalSupportAccountByCompanyId(companyId: string) {
   }
 
   const result = await db.query<InternalSupportAccountRecord>(
-    `select id, company_id, display_name, email, password_hash, role, is_active, created_at, updated_at, last_login_at
-     from internal_support_accounts
+    `${accountSelect}
      where upper(company_id) = upper($1)
      limit 1`,
     [companyId],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+export async function findInternalSupportAccountByEmail(email: string) {
+  const db = getDbPool();
+
+  if (!db) {
+    return null;
+  }
+
+  const result = await db.query<InternalSupportAccountRecord>(
+    `${accountSelect}
+     where lower(email) = lower($1)
+     limit 1`,
+    [email],
   );
 
   return result.rows[0] ?? null;
@@ -52,8 +82,7 @@ export async function findInternalSupportAccountById(accountId: string) {
   }
 
   const result = await db.query<InternalSupportAccountRecord>(
-    `select id, company_id, display_name, email, password_hash, role, is_active, created_at, updated_at, last_login_at
-     from internal_support_accounts
+    `${accountSelect}
      where id = $1
      limit 1`,
     [accountId],
