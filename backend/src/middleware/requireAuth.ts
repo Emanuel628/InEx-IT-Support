@@ -12,40 +12,42 @@ declare module 'express-serve-static-core' {
   }
 }
 
-export async function requireAuth(request: Request, response: Response, next: NextFunction) {
-  const authHeader = request.header('authorization');
+export function requireAuth(request: Request, response: Response, next: NextFunction) {
+  void (async () => {
+    const authHeader = request.header('authorization');
 
-  if (!authHeader?.startsWith('Bearer ')) {
-    return response.status(401).json({
-      ok: false,
-      message: 'Authentication required.',
-    });
-  }
+    if (!authHeader?.startsWith('Bearer ')) {
+      return response.status(401).json({
+        ok: false,
+        message: 'Authentication required.',
+      });
+    }
 
-  const token = authHeader.slice('Bearer '.length).trim();
-  const payload = verifyAuthToken(token);
+    const token = authHeader.slice('Bearer '.length).trim();
+    const payload = verifyAuthToken(token);
 
-  if (!payload) {
-    return response.status(401).json({
-      ok: false,
-      message: 'Invalid or expired token.',
-    });
-  }
+    if (!payload) {
+      return response.status(401).json({
+        ok: false,
+        message: 'Invalid or expired token.',
+      });
+    }
 
-  const account = await findInternalSupportAccountById(payload.sub);
+    const account = await findInternalSupportAccountById(payload.sub);
 
-  if (!account || !account.is_active) {
-    return response.status(401).json({
-      ok: false,
-      message: 'Authenticated account is not available.',
-    });
-  }
+    if (!account || !account.is_active) {
+      return response.status(401).json({
+        ok: false,
+        message: 'Authenticated account is not available.',
+      });
+    }
 
-  request.auth = {
-    ...payload,
-    role: account.role,
-    companyId: account.company_id,
-  };
-  request.authAccount = account;
-  next();
+    request.auth = {
+      ...payload,
+      role: account.role,
+      companyId: account.company_id,
+    };
+    request.authAccount = account;
+    next();
+  })().catch(next);
 }
