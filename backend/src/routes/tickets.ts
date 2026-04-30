@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { asyncHandler } from '../lib/asyncHandler.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireRole } from '../middleware/requireRole.js';
 import { listActivityForEntity, logActivity } from '../repositories/activityLog.js';
@@ -22,16 +23,16 @@ const ticketSchema = z.object({
 
 export const ticketsRouter = Router();
 
-ticketsRouter.get('/api/tickets', requireAuth, async (_request, response) => {
+ticketsRouter.get('/api/tickets', requireAuth, asyncHandler(async (_request, response) => {
   const items = await listTickets();
 
   response.status(200).json({
     ok: true,
     items,
   });
-});
+}));
 
-ticketsRouter.get('/api/tickets/:ticketId', requireAuth, async (request, response) => {
+ticketsRouter.get('/api/tickets/:ticketId', requireAuth, asyncHandler(async (request, response) => {
   const ticket = await getTicketById(request.params.ticketId);
 
   if (!ticket) {
@@ -48,9 +49,9 @@ ticketsRouter.get('/api/tickets/:ticketId', requireAuth, async (request, respons
     item: ticket,
     activity,
   });
-});
+}));
 
-ticketsRouter.post('/api/tickets', requireAuth, requireRole(['admin', 'support_manager', 'support_agent']), async (request, response) => {
+ticketsRouter.post('/api/tickets', requireAuth, requireRole(['admin', 'support_manager', 'support_agent']), asyncHandler(async (request, response) => {
   const parsed = ticketSchema.safeParse(request.body);
 
   if (!parsed.success) {
@@ -92,9 +93,9 @@ ticketsRouter.post('/api/tickets', requireAuth, requireRole(['admin', 'support_m
     ok: true,
     item: ticket,
   });
-});
+}));
 
-ticketsRouter.put('/api/tickets/:ticketId', requireAuth, requireRole(['admin', 'support_manager', 'support_agent']), async (request, response) => {
+ticketsRouter.put('/api/tickets/:ticketId', requireAuth, requireRole(['admin', 'support_manager', 'support_agent']), asyncHandler(async (request, response) => {
   const parsed = ticketSchema.safeParse(request.body);
 
   if (!parsed.success) {
@@ -143,4 +144,4 @@ ticketsRouter.put('/api/tickets/:ticketId', requireAuth, requireRole(['admin', '
     ok: true,
     item: ticket,
   });
-});
+}));
