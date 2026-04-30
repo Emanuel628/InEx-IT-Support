@@ -35,27 +35,37 @@ const navGroups = [
 export function Sidebar() {
   return (
     <aside className="sidebar">
-      <h1>InEx IT Support</h1>
-      <p>Internal support console for InEx Ledger</p>
+      <div className="sidebar-brand">
+        <span className="sidebar-kicker">InEx Ledger</span>
+        <h1>InEx IT Support</h1>
+        <p>Internal support console for tickets, incidents, releases, and operational follow-through.</p>
+      </div>
 
       <nav className="sidebar-nav" aria-label="Main navigation">
         {navGroups.map((group) => (
           <div key={group.label} className="sidebar-group">
             <div className="sidebar-group-label">{group.label}</div>
-            {group.items.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  `sidebar-link${isActive ? ' active' : ''}`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
+            <div className="sidebar-group-links">
+              {group.items.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `sidebar-link${isActive ? ' active' : ''}`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
           </div>
         ))}
       </nav>
+
+      <div className="sidebar-footer">
+        <strong>Workspace</strong>
+        <span>Local-first support operations with structured handoff into the backend phase.</span>
+      </div>
     </aside>
   );
 }
