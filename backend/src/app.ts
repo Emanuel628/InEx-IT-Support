@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import { env } from './config/env.js';
+import { errorHandler } from './middleware/errorHandler.js';
 import { authRouter } from './routes/auth.js';
 import { setupRouter } from './routes/setup.js';
 import { supportRouter } from './routes/support.js';
@@ -28,6 +29,15 @@ export function createApp() {
   app.use(authRouter);
   app.use(supportRouter);
   app.use(ticketsRouter);
+
+  app.use((_request, response) => {
+    response.status(404).json({
+      ok: false,
+      message: 'Route not found.',
+    });
+  });
+
+  app.use(errorHandler);
 
   return app;
 }
