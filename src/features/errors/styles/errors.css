@@ -1,40 +1,51 @@
 .error-workspace-page {
   display: grid;
-  gap: 20px;
+  gap: 24px;
 }
 
 .error-page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
+  gap: 18px;
+  padding: 8px 2px 0;
 }
 
 .error-page-header h2 {
-  margin: 4px 0 8px;
-  font-size: 1.75rem;
+  margin: 6px 0 10px;
+  font-size: clamp(1.95rem, 2.4vw, 2.35rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
 }
 
 .error-page-header p {
+  max-width: 760px;
   margin: 0;
   color: #94a3b8;
+  font-size: 0.98rem;
 }
 
 .error-page-eyebrow {
   display: inline-block;
   color: #fca5a5;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .error-primary-action {
-  border: 1px solid rgba(248, 113, 113, 0.26);
-  border-radius: 12px;
-  padding: 10px 14px;
-  background: rgba(239, 68, 68, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.22) 0%, rgba(220, 38, 38, 0.16) 100%);
   color: #fff;
   text-decoration: none;
+  font-weight: 600;
 }
 
 .error-stats-grid,
@@ -42,16 +53,17 @@
 .error-form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .error-stat-card,
 .error-panel,
 .error-detail-card {
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: 18px;
-  background: rgba(30, 41, 59, 0.55);
-  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.62) 0%, rgba(15, 23, 42, 0.64) 100%);
+  padding: 18px;
+  box-shadow: 0 20px 36px rgba(2, 6, 23, 0.22);
 }
 
 .error-stat-card span,
@@ -61,11 +73,13 @@
   display: block;
   color: #94a3b8;
   font-size: 0.8rem;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .error-stat-card strong {
-  font-size: 1.8rem;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
 }
 
 .error-filters-bar,
@@ -80,10 +94,6 @@
 
 .error-filters-bar-wide {
   grid-template-columns: minmax(260px, 2fr) repeat(5, minmax(150px, 1fr));
-}
-
-.error-filter-search {
-  grid-column: span 1;
 }
 
 .error-filter-group label,
@@ -104,17 +114,17 @@
 .error-form-grid textarea {
   width: 100%;
   border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 12px;
-  background: rgba(15, 23, 42, 0.75);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.8);
   color: #e2e8f0;
-  padding: 10px 12px;
+  padding: 11px 13px;
 }
 
 .error-table-wrap {
-  overflow-x: auto;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: 18px;
-  background: rgba(15, 23, 42, 0.45);
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.48) 0%, rgba(15, 23, 42, 0.42) 100%);
 }
 
 .error-table {
@@ -125,29 +135,34 @@
 
 .error-table th,
 .error-table td {
-  padding: 14px 16px;
+  padding: 15px 18px;
   text-align: left;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
 }
 
 .error-table th {
   color: #94a3b8;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
 }
 
 .error-title-cell {
   display: grid;
-  gap: 4px;
+  gap: 5px;
   color: inherit;
   text-decoration: none;
+}
+
+.error-title-cell strong {
+  font-size: 0.96rem;
 }
 
 .error-title-cell span,
 .error-link-list span,
 .error-link-list small {
   color: #94a3b8;
+  font-size: 0.84rem;
 }
 
 .error-badge {
@@ -155,7 +170,8 @@
   align-items: center;
   border-radius: 999px;
   padding: 6px 10px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
   text-transform: capitalize;
   border: 1px solid transparent;
 }
@@ -177,81 +193,34 @@
 }
 
 .error-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 16px;
 }
 
 .error-section-header h3 {
   margin: 0 0 4px;
+  font-size: 1.02rem;
 }
 
-.error-form-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-}
-
-.error-form-actions button,
-.error-inline-actions button {
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 12px;
-  padding: 10px 14px;
-  background: rgba(239, 68, 68, 0.18);
-  color: #fff;
-  cursor: pointer;
-}
-
-.error-inline-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.error-link-actions-group {
-  display: grid;
-  gap: 10px;
-}
-
-.error-activity-list {
-  display: grid;
-  gap: 12px;
-}
-
-.error-activity-item {
-  border-left: 2px solid rgba(248, 113, 113, 0.35);
-  padding-left: 12px;
-  display: grid;
-  gap: 6px;
-}
-
-.error-activity-item p,
-.error-activity-item small {
-  margin: 0;
-}
-
-.error-activity-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
+.error-form-actions,
+.error-inline-actions,
+.error-link-actions-group,
+.error-activity-list,
 .error-detail-stack,
 .error-link-list,
 .error-empty-state {
   display: grid;
-  gap: 10px;
-}
-
-.error-detail-stack p,
-.error-empty-state p,
-.error-link-list p,
-.error-detail-card p {
-  margin: 0;
+  gap: 12px;
 }
 
 .error-empty-state {
   border: 1px dashed rgba(148, 163, 184, 0.2);
-  border-radius: 18px;
-  padding: 18px;
+  border-radius: 20px;
+  padding: 22px;
+  background: rgba(15, 23, 42, 0.26);
 }
 
 @media (max-width: 1200px) {
@@ -268,8 +237,8 @@
 
 @media (max-width: 720px) {
   .error-page-header {
-    grid-template-columns: 1fr;
     display: grid;
+    grid-template-columns: 1fr;
   }
 
   .error-filters-bar,
