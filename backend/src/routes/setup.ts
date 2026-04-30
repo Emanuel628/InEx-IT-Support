@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { env } from '../config/env.js';
 import { hashPassword } from '../auth/password.js';
+import { asyncHandler } from '../lib/asyncHandler.js';
 import {
   countInternalSupportAccounts,
   createInternalSupportAccount,
@@ -16,7 +17,7 @@ const bootstrapSchema = z.object({
 
 export const setupRouter = Router();
 
-setupRouter.post('/api/setup/bootstrap-admin', async (request, response) => {
+setupRouter.post('/api/setup/bootstrap-admin', asyncHandler(async (request, response) => {
   const parsed = bootstrapSchema.safeParse(request.body);
 
   if (!parsed.success) {
@@ -69,4 +70,4 @@ setupRouter.post('/api/setup/bootstrap-admin', async (request, response) => {
       role: account.role,
     },
   });
-});
+}));
