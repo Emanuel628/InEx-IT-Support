@@ -1,13 +1,18 @@
 import type { NextFunction, Request, Response } from 'express';
 import { verifyAuthToken, type AuthTokenPayload } from '../auth/token.js';
+import {
+  findInternalSupportAccountById,
+  type InternalSupportAccountRecord,
+} from '../repositories/internalSupportAccounts.js';
 
 declare module 'express-serve-static-core' {
   interface Request {
     auth?: AuthTokenPayload;
+    authAccount?: InternalSupportAccountRecord;
   }
 }
 
-export function requireAuth(request: Request, response: Response, next: NextFunction) {
+export async function requireAuth(request: Request, response: Response, next: NextFunction) {
   const authHeader = request.header('authorization');
 
   if (!authHeader?.startsWith('Bearer ')) {
@@ -27,6 +32,20 @@ export function requireAuth(request: Request, response: Response, next: NextFunc
     });
   }
 
-  request.auth = payload;
+  const account = await findInternalSupportAccountById(payload.sub);
+
+  if (!account || !account.is_active) {
+    return response.status(401).json({
+      ok: false,
+      message: 'Authenticated account is not available.',
+    });
+  }
+
+  request.auth = {
+    ...payload,
+    role: account.role,
+    companyId: account.company_id,
+  };
+  request.authAccount = account;
   next();
 }
