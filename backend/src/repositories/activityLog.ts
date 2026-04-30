@@ -28,6 +28,35 @@ export async function logActivity(input: {
   );
 }
 
+export async function listActivity(limit = 100) {
+  const db = getDbPool();
+
+  if (!db) {
+    throw new Error('Database is not configured.');
+  }
+
+  const safeLimit = Math.max(1, Math.min(limit, 250));
+
+  const result = await db.query<{
+    id: string;
+    entity_type: string;
+    entity_id: string;
+    action: string;
+    actor_account_id: string | null;
+    summary: string;
+    metadata: Record<string, unknown>;
+    created_at: string;
+  }>(
+    `select id, entity_type, entity_id, action, actor_account_id, summary, metadata, created_at
+     from activity_log
+     order by created_at desc
+     limit $1`,
+    [safeLimit],
+  );
+
+  return result.rows;
+}
+
 export async function listActivityForEntity(entityType: string, entityId: string) {
   const db = getDbPool();
 
