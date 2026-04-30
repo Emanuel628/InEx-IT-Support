@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { createAuthToken } from '../auth/token.js';
 import { getDbPool } from '../db/client.js';
+import { asyncHandler } from '../lib/asyncHandler.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { verifyPassword } from '../auth/password.js';
 import {
@@ -17,7 +18,7 @@ const loginSchema = z.object({
 
 export const authRouter = Router();
 
-authRouter.post('/auth/login', async (request, response) => {
+authRouter.post('/auth/login', asyncHandler(async (request, response) => {
   const parsed = loginSchema.safeParse(request.body);
 
   if (!parsed.success) {
@@ -74,9 +75,9 @@ authRouter.post('/auth/login', async (request, response) => {
       isActive: account.is_active,
     },
   });
-});
+}));
 
-authRouter.get('/auth/me', requireAuth, async (request, response) => {
+authRouter.get('/auth/me', requireAuth, asyncHandler(async (request, response) => {
   const accountId = request.auth?.sub;
 
   if (!accountId) {
@@ -107,7 +108,7 @@ authRouter.get('/auth/me', requireAuth, async (request, response) => {
       lastLoginAt: account.last_login_at,
     },
   });
-});
+}));
 
 authRouter.post('/auth/logout', requireAuth, (_request, response) => {
   return response.status(200).json({
