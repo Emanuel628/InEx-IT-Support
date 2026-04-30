@@ -1,18 +1,21 @@
 .activity-page {
   display: grid;
-  gap: 20px;
+  gap: 24px;
 }
 
 .activity-page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
+  gap: 18px;
+  padding: 8px 2px 0;
 }
 
 .activity-page-header h2 {
-  margin: 4px 0 8px;
-  font-size: 1.75rem;
+  margin: 6px 0 10px;
+  font-size: clamp(1.95rem, 2.4vw, 2.35rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
 }
 
 .activity-page-header p,
@@ -20,13 +23,15 @@
 .activity-empty-state p {
   margin: 0;
   color: #94a3b8;
+  font-size: 0.98rem;
 }
 
 .activity-page-eyebrow {
   display: inline-block;
   color: #93c5fd;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -34,17 +39,18 @@
 .activity-filter-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .activity-stat-card,
 .activity-filter-card,
 .activity-list,
 .activity-empty-state {
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  border-radius: 18px;
-  background: rgba(30, 41, 59, 0.55);
-  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.62) 0%, rgba(15, 23, 42, 0.64) 100%);
+  padding: 18px;
+  box-shadow: 0 20px 36px rgba(2, 6, 23, 0.22);
 }
 
 .activity-stat-card span,
@@ -54,11 +60,13 @@
   display: block;
   color: #94a3b8;
   font-size: 0.8rem;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .activity-stat-card strong {
-  font-size: 1.8rem;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.04em;
 }
 
 .activity-filter-card label {
@@ -71,22 +79,25 @@
 .activity-filter-card select {
   width: 100%;
   border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 12px;
-  background: rgba(15, 23, 42, 0.75);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.8);
   color: #e2e8f0;
-  padding: 10px 12px;
+  padding: 11px 13px;
 }
 
 .activity-list {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .activity-item {
+  border: 1px solid rgba(148, 163, 184, 0.1);
   border-left: 2px solid rgba(96, 165, 250, 0.4);
-  padding-left: 14px;
+  border-radius: 18px;
+  padding: 16px;
   display: grid;
-  gap: 6px;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.34);
 }
 
 .activity-item-header {
@@ -102,6 +113,7 @@
 
 .activity-item-summary {
   margin: 0;
+  color: #e2e8f0;
 }
 
 .activity-item-tags {
@@ -115,7 +127,8 @@
   align-items: center;
   border-radius: 999px;
   padding: 6px 10px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
   background: rgba(148, 163, 184, 0.14);
   border: 1px solid rgba(148, 163, 184, 0.22);
 }
