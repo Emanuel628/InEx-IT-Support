@@ -6,6 +6,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { activityRouter } from './routes/activity.js';
 import { accountsRouter } from './routes/accounts.js';
 import { authRouter } from './routes/auth.js';
+import { incidentsRouter } from './routes/incidents.js';
 import { setupRouter } from './routes/setup.js';
 import { supportRouter } from './routes/support.js';
 import { systemRouter } from './routes/system.js';
@@ -32,6 +33,7 @@ export function createApp() {
   app.use(supportRouter);
   app.use(accountsRouter);
   app.use(ticketsRouter);
+  app.use(incidentsRouter);
   app.use(activityRouter);
 
   app.use((_request, response) => {
